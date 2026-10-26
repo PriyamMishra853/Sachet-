@@ -39,4 +39,5 @@ Copy `.env.example` to `.env` for local secrets. `.env` is git-ignored; never co
 
 | Day | Build                                    | Status      |
 | --- | ---------------------------------------- | ----------- |
-| 1   | Monorepo, TypeScript, ESLint, Vitest, CI | In progress |
+| 1   | Monorepo, TypeScript, ESLint, Vitest, CI | Done        |
+| 2   | Normalizers: phone, UPI ID, URL          | In progress |
