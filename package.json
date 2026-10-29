@@ -12,7 +12,12 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
-    "dev:api": "pnpm --filter @sachet/api dev"
+    "eval": "pnpm --filter @sachet/core eval",
+    "dev:api": "pnpm --filter @sachet/api dev",
+    "dev:web": "pnpm --filter @sachet/web dev",
+    "db:migrate": "pnpm --filter @sachet/db migrate",
+    "db:seed": "pnpm --filter @sachet/db seed",
+    "telegram:webhook": "tsx backend/api/scripts/set-telegram-webhook.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -20,8 +25,14 @@
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
     "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss@<8.5.23": "^8.5.23"
+    }
   }
 }

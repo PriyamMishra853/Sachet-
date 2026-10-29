@@ -3,3 +3,6 @@ dist
 .next
 coverage
 pnpm-lock.yaml
+frontend/web/next-env.d.ts
+frontend/android/**/build
+frontend/android/.gradle

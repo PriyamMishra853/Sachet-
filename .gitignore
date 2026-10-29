@@ -9,3 +9,7 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# Build caches and local tool config
+*.tsbuildinfo
+.claude/

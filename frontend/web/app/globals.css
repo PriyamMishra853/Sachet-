@@ -1,0 +1,406 @@
+:root {
+  --bg: #f6f7f5;
+  --surface: #ffffff;
+  --text: #1b1f1d;
+  --muted: #5d6662;
+  --border: #dde2df;
+  --brand: #0f5132;
+  --brand-ink: #ffffff;
+  --high: #b42318;
+  --high-bg: #fdecea;
+  --medium: #b54708;
+  --medium-bg: #fef4e6;
+  --low: #8a6d00;
+  --low-bg: #fffbe6;
+  --unknown: #475467;
+  --unknown-bg: #f2f4f7;
+  --ok: #067647;
+  --radius: 14px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111413;
+    --surface: #1a1f1d;
+    --text: #e8ecea;
+    --muted: #a3ada8;
+    --border: #2d3431;
+    --brand: #4cc38a;
+    --brand-ink: #0b1a13;
+    --high: #ff8a80;
+    --high-bg: #3a1714;
+    --medium: #ffb168;
+    --medium-bg: #3a2511;
+    --low: #f5d76e;
+    --low-bg: #332b0c;
+    --unknown: #c0c8d2;
+    --unknown-bg: #22282e;
+    --ok: #5fd39b;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    17px/1.55 system-ui,
+    -apple-system,
+    "Segoe UI",
+    "Noto Sans",
+    "Noto Sans Devanagari",
+    sans-serif;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 8px 16px 32px;
+}
+
+h1 {
+  font-size: 1.7rem;
+  line-height: 1.25;
+  margin: 16px 0 6px;
+}
+
+h2 {
+  font-size: 1.2rem;
+}
+
+h3 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 18px 0 6px;
+}
+
+a {
+  color: var(--brand);
+}
+
+.lead {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+/* Header */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header .bar,
+.site-header nav {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.site-header .bar {
+  justify-content: space-between;
+}
+
+.site-header nav {
+  padding-top: 0;
+  overflow-x: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 800;
+}
+
+nav a {
+  padding: 8px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--muted);
+  white-space: nowrap;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+nav a[aria-current="page"] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lang-toggle {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.95rem;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+/* Cards and forms */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  outline-offset: 1px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border: 0;
+  border-radius: 10px;
+  padding: 14px;
+  font-weight: 700;
+  min-height: 48px;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-height: 48px;
+  width: 100%;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 10px 4px;
+  border-radius: 8px;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+.tabs button[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+.error {
+  color: var(--high);
+  margin: 0;
+}
+
+.ok {
+  color: var(--ok);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Result */
+.result {
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  margin: 16px 0;
+  border: 2px solid;
+}
+
+.result ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.result li + li {
+  margin-top: 6px;
+}
+
+.result-band {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.scam-type {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+.sender {
+  margin: 10px 0 0;
+}
+
+.band-high {
+  background: var(--high-bg);
+  border-color: var(--high);
+}
+
+.band-high .result-band {
+  color: var(--high);
+}
+
+.band-medium {
+  background: var(--medium-bg);
+  border-color: var(--medium);
+}
+
+.band-medium .result-band {
+  color: var(--medium);
+}
+
+.band-low {
+  background: var(--low-bg);
+  border-color: var(--low);
+}
+
+.band-unknown {
+  background: var(--unknown-bg);
+  border-color: var(--border);
+}
+
+.band-unknown .result-band {
+  color: var(--unknown);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.chips code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  margin-top: 18px;
+}
+
+.prose h2 {
+  margin: 0;
+}
+
+.prose ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.prose li + li {
+  margin-top: 8px;
+}
+
+/* Footer */
+.site-footer {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 16px 40px;
+  text-align: center;
+}
+
+.helpline {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.install p {
+  margin: 0;
+}

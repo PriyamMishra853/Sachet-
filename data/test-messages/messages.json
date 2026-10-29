@@ -1,0 +1,432 @@
+[
+  {
+    "id": "inv-1",
+    "label": "investment",
+    "source": "synthetic",
+    "text": "Join our VIP stock tips group and get guaranteed returns of 10% daily. Pay ₹5,000 membership to profit.king@ibl"
+  },
+  {
+    "id": "inv-2",
+    "label": "investment",
+    "source": "synthetic",
+    "text": "Paisa double in 30 din! Crypto trading app me invest karo, guaranteed profit. Abhi join karo https://bit.ly/cryptox2"
+  },
+  {
+    "id": "inv-3",
+    "label": "investment",
+    "source": "synthetic",
+    "text": "IPO allotment guaranteed for our members. Deposit Rs 50,000 in the trading account today only."
+  },
+  {
+    "id": "inv-4",
+    "label": "investment",
+    "source": "synthetic",
+    "text": "शेयर बाजार में गारंटीड मुनाफा! हमारे VIP ग्रुप से जुड़ें और 5% रोज़ कमाएं।"
+  },
+  {
+    "id": "inv-5",
+    "label": "investment",
+    "source": "synthetic",
+    "text": "Sir, our F&O signals gave 300% returns last month. Transfer 25k to start, limited seats, join within 2 hours."
+  },
+
+  {
+    "id": "da-1",
+    "label": "digital_arrest",
+    "source": "synthetic",
+    "text": "This is CBI officer Sharma. A money laundering case is registered against you. Stay on video call and don't tell anyone. Transfer ₹2 lakh for verification."
+  },
+  {
+    "id": "da-2",
+    "label": "digital_arrest",
+    "source": "synthetic",
+    "text": "Your Aadhaar is linked to illegal parcels. Arrest warrant issued by Mumbai Police. You are under digital arrest. Pay security deposit now."
+  },
+  {
+    "id": "da-3",
+    "label": "digital_arrest",
+    "source": "synthetic",
+    "text": "आपके खिलाफ केस दर्ज है, मनी लॉन्ड्रिंग का मामला है। किसी को मत बताना, वीडियो कॉल पर रहें।"
+  },
+  {
+    "id": "da-4",
+    "label": "digital_arrest",
+    "source": "synthetic",
+    "text": "Crime branch se bol raha hoon. Aapka naam hawala case me hai, kisi ko mat batana, abhi 50,000 jama karo warna giraftari hogi."
+  },
+  {
+    "id": "da-5",
+    "label": "digital_arrest",
+    "source": "synthetic",
+    "text": "TRAI notice: your number will be blocked in 2 hours due to illegal activity. Press 9 to talk to the cyber cell officer."
+  },
+
+  {
+    "id": "par-1",
+    "label": "parcel",
+    "source": "synthetic",
+    "text": "Your FedEx parcel is held by customs. Drugs found in your parcel. Pay customs clearance fee ₹2,999 to customs.clear@ybl within 2 hours."
+  },
+  {
+    "id": "par-2",
+    "label": "parcel",
+    "source": "synthetic",
+    "text": "India Post: your package is on hold due to incomplete address. Update and pay Rs 25 at https://indiapost-track.top/update"
+  },
+  {
+    "id": "par-3",
+    "label": "parcel",
+    "source": "synthetic",
+    "text": "आपका पार्सल कस्टम में रोका गया है। कस्टम ड्यूटी ₹4,500 तुरंत भरें।"
+  },
+  {
+    "id": "par-4",
+    "label": "parcel",
+    "source": "synthetic",
+    "text": "DHL courier: shipment seized at Mumbai airport, fake passports found. Call 9123456780 immediately."
+  },
+  {
+    "id": "par-5",
+    "label": "parcel",
+    "source": "synthetic",
+    "text": "Bhai aapka courier customs me ruka hai, customs duty 1500 rupaye bhejo isi number pe 9988776655@ybl"
+  },
+
+  {
+    "id": "kyc-1",
+    "label": "kyc",
+    "source": "synthetic",
+    "text": "Dear Customer, your SBI KYC has expired. Your account will be blocked today. Update now: http://sbi-kyc-update.xyz/login"
+  },
+  {
+    "id": "kyc-2",
+    "label": "kyc",
+    "source": "synthetic",
+    "text": "HDFC: Your net banking will be suspended. Link PAN immediately at hxxps://hdfcbank-secure[.]top/pan"
+  },
+  {
+    "id": "kyc-3",
+    "label": "kyc",
+    "source": "synthetic",
+    "text": "प्रिय ग्राहक, आपका बैंक खाता आज बंद हो जाएगा। केवाईसी अपडेट करें, नीचे दी गई APK डाउनलोड करें: SBI_KYC.apk"
+  },
+  {
+    "id": "kyc-4",
+    "label": "kyc",
+    "source": "synthetic",
+    "text": "Your Paytm wallet KYC pending, wallet will be frozen in 24 hours. Call support 7012345678 to verify."
+  },
+  {
+    "id": "kyc-5",
+    "label": "kyc",
+    "source": "synthetic",
+    "text": "YONO account blocked. Update PAN card details now at bit.ly/yono-pan or account will be closed."
+  },
+
+  {
+    "id": "ele-1",
+    "label": "electricity",
+    "source": "synthetic",
+    "text": "Dear consumer, your electricity power will be disconnected tonight at 9:30 pm because previous month bill was not updated. Contact electricity officer 9876543210"
+  },
+  {
+    "id": "ele-2",
+    "label": "electricity",
+    "source": "synthetic",
+    "text": "आपकी बिजली आज रात काट दी जाएगी। बिल अपडेट नहीं है। तुरंत बिजली अधिकारी 9123456789 से संपर्क करें।"
+  },
+  {
+    "id": "ele-3",
+    "label": "electricity",
+    "source": "synthetic",
+    "text": "Bijli connection aaj raat kat jayega, bill pending hai. Abhi call karo 8877665544"
+  },
+  {
+    "id": "ele-4",
+    "label": "electricity",
+    "source": "synthetic",
+    "text": "EB notice: your light connection will be cut within 2 hours. Pay Rs 10 at https://bit.ly/eb-pay to update."
+  },
+  {
+    "id": "ele-5",
+    "label": "electricity",
+    "source": "synthetic",
+    "text": "Electricity bill unpaid. Power supply disconnection today. Install the app from https://powerbill-update.in/app.apk"
+  },
+
+  {
+    "id": "job-1",
+    "label": "task_job",
+    "source": "synthetic",
+    "text": "Part time job! Like YouTube videos and earn ₹5,000 daily. Contact HR on Telegram."
+  },
+  {
+    "id": "job-2",
+    "label": "task_job",
+    "source": "synthetic",
+    "text": "Ghar baithe kamai karo, rate hotels on Google and get paid Rs 150 per task. Prepaid task me 1000 invest karo double milega."
+  },
+  {
+    "id": "job-3",
+    "label": "task_job",
+    "source": "synthetic",
+    "text": "घर बैठे कमाई! रोज़ ₹3000 कमाएं, सिर्फ वीडियो लाइक करने हैं। टास्क के लिए पहले रिचार्ज करें।"
+  },
+  {
+    "id": "job-4",
+    "label": "task_job",
+    "source": "synthetic",
+    "text": "Hiring for work from home job, earn 8000 per day by reviewing products. Merchant task recharge required."
+  },
+  {
+    "id": "job-5",
+    "label": "task_job",
+    "source": "synthetic",
+    "text": "Hello, I am Priya from Amazon HR. Simple online tasks, daily income Rs 2,000-5,000. Interested? wa.me/919988776655"
+  },
+
+  {
+    "id": "ref-1",
+    "label": "upi_refund",
+    "source": "synthetic",
+    "text": "Your refund of Rs 1,499 is ready. Accept the collect request and enter UPI PIN to receive money."
+  },
+  {
+    "id": "ref-2",
+    "label": "upi_refund",
+    "source": "synthetic",
+    "text": "Cashback ₹500 credited! Approve the payment request on refund.desk@paytm to get the cashback."
+  },
+  {
+    "id": "ref-3",
+    "label": "upi_refund",
+    "source": "synthetic",
+    "text": "Sir galti se aapko 5000 bhej diye, pin daalo paise milenge, request bheji hai."
+  },
+  {
+    "id": "ref-4",
+    "label": "upi_refund",
+    "source": "synthetic",
+    "text": "रिफंड पाने के लिए UPI पिन डालें, पैसे तुरंत मिलेंगे।"
+  },
+  {
+    "id": "ref-5",
+    "label": "upi_refund",
+    "source": "synthetic",
+    "text": "Flipkart refund: enter your PIN to receive the refund of ₹2,340. Request expires in 10 minutes."
+  },
+
+  {
+    "id": "lot-1",
+    "label": "lottery",
+    "source": "synthetic",
+    "text": "Congratulations! You have won KBC lottery of 25 lakh. Pay processing fee ₹15,000 to claim. WhatsApp 7012345678"
+  },
+  {
+    "id": "lot-2",
+    "label": "lottery",
+    "source": "synthetic",
+    "text": "आपने 25 लाख की लॉटरी जीती है! केबीसी से इनाम लेने के लिए रजिस्ट्रेशन फीस भेजें।"
+  },
+  {
+    "id": "lot-3",
+    "label": "lottery",
+    "source": "synthetic",
+    "text": "Lucky draw winner! Your number won a Tata Safari. Delivery charges Rs 12,500 only."
+  },
+  {
+    "id": "lot-4",
+    "label": "lottery",
+    "source": "synthetic",
+    "text": "Badhai ho, aapne jeeta 10 lakh ka inaam. GST charges 8000 bhejo lucky.draw@ybl pe."
+  },
+  {
+    "id": "lot-5",
+    "label": "lottery",
+    "source": "synthetic",
+    "text": "Jio Lucky Draw: you won ₹50,00,000 jackpot. Contact manager immediately to claim prize."
+  },
+
+  {
+    "id": "loan-1",
+    "label": "loan_app",
+    "source": "synthetic",
+    "text": "Instant loan of ₹50,000 in 5 minutes! No documents, no CIBIL. Download app: bit.ly/qloan"
+  },
+  {
+    "id": "loan-2",
+    "label": "loan_app",
+    "source": "synthetic",
+    "text": "Loan approved! Bina kagaz turant loan, install EasyCash.apk now."
+  },
+  {
+    "id": "loan-3",
+    "label": "loan_app",
+    "source": "synthetic",
+    "text": "तुरंत लोन पाएं, बिना दस्तावेज। सिर्फ 199 रुपये प्रोसेसिंग फीस।"
+  },
+  {
+    "id": "loan-4",
+    "label": "loan_app",
+    "source": "synthetic",
+    "text": "Pre-approved personal loan 2 lakh, paise 10 minutes me account me. Pay file charge 999 to loan.desk@axl"
+  },
+  {
+    "id": "loan-5",
+    "label": "loan_app",
+    "source": "synthetic",
+    "text": "Need money urgently? Loan in 2 mins without paperwork. Click http://103.21.45.67/loan"
+  },
+
+  {
+    "id": "sup-1",
+    "label": "fake_support",
+    "source": "synthetic",
+    "text": "Amazon customer care: your refund is stuck. Install AnyDesk and share the OTP to process it. Call 9876501234"
+  },
+  {
+    "id": "sup-2",
+    "label": "fake_support",
+    "source": "synthetic",
+    "text": "Hello, I am from SBI customer support. Please tell me the OTP you just received to stop the fraud transaction."
+  },
+  {
+    "id": "sup-3",
+    "label": "fake_support",
+    "source": "synthetic",
+    "text": "आपका कार्ड ब्लॉक होने वाला है। कस्टमर केयर से बात करें और ओटीपी बताएं।"
+  },
+  {
+    "id": "sup-4",
+    "label": "fake_support",
+    "source": "synthetic",
+    "text": "Swiggy customer care number 8800112233, call for refund. Download TeamViewer QuickSupport for screen share."
+  },
+  {
+    "id": "sup-5",
+    "label": "fake_support",
+    "source": "synthetic",
+    "text": "Bhaiya OTP bata do jo abhi aaya, galti se aapke number pe chala gaya. Customer care se bol raha hoon."
+  },
+
+  {
+    "id": "ok-1",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Your OTP for login is 482913. Do not share it with anyone. -SBI"
+  },
+  {
+    "id": "ok-2",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Rs 2,500 debited from your a/c XX1234 on 26-10-2026 via UPI. Not you? Call 1800-1234. -HDFC Bank"
+  },
+  {
+    "id": "ok-3",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Hello beta, kaise ho? Ghar kab aa rahe ho? Mummy ne laddoo banaye hain."
+  },
+  {
+    "id": "ok-4",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Meeting tomorrow at 10:30 in room 204. Please bring the robotics project report."
+  },
+  {
+    "id": "ok-5",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Your Amazon order #402-1234567 has been shipped and will arrive on Friday."
+  },
+  {
+    "id": "ok-6",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "बेटा, शाम को सब्ज़ी लेते आना। आलू और टमाटर।"
+  },
+  {
+    "id": "ok-7",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Bro tonight match dekhne aa raha hai? 8 baje tak aa jaana."
+  },
+  {
+    "id": "ok-8",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Exam schedule for semester 5 is uploaded on the college website. Check the notice board too."
+  },
+  {
+    "id": "ok-9",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Paytm: You received ₹500 from Ramesh. Balance updated."
+  },
+  {
+    "id": "ok-10",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Kal ki party ke liye 300 rupaye de dena, cake order kar diya hai."
+  },
+  {
+    "id": "ok-11",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Your electricity bill of Rs 1,240 for October is generated. Pay by 15 Nov on the official app to avoid late fee."
+  },
+  {
+    "id": "ok-12",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Happy Diwali to you and your family! Have a safe and bright festival."
+  },
+  {
+    "id": "ok-13",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Dad, my train is late by 2 hours. Will reach by 11 pm."
+  },
+  {
+    "id": "ok-14",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Your IRCTC ticket PNR 4512367890 is confirmed. Coach B2, seat 34."
+  },
+  {
+    "id": "ok-15",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Reminder: robotics club meeting moved to Thursday 5 pm. Bring your laptops."
+  },
+  {
+    "id": "ok-16",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Thanks for shopping at DMart. Your bill of Rs 1,845 is paid. Visit again."
+  },
+  {
+    "id": "ok-17",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Never share your UPI PIN or OTP with anyone. Bank staff will never ask for it. -RBI"
+  },
+  {
+    "id": "ok-18",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Didi ka phone number naya hai, 9876543210 save kar lo."
+  },
+  {
+    "id": "ok-19",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Assignment submission link: https://classroom.google.com/c/abc123 . Deadline Friday."
+  },
+  {
+    "id": "ok-20",
+    "label": "normal",
+    "source": "synthetic",
+    "text": "Your Jio recharge of Rs 299 is successful. Validity 28 days."
+  }
+]

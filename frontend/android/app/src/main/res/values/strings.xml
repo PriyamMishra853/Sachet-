@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only what Android itself shows. All in-app text is in i18n/Strings.kt (English + Hindi). -->
+<resources>
+    <string name="app_name" translatable="false">Sachet</string>
+    <string name="share_label">Check with Sachet</string>
+</resources>

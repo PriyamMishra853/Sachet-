@@ -1,0 +1,67 @@
+# Sachet for Android
+
+Native Android app (Kotlin, Jetpack Compose). It talks to the same API as the website and the
+bots, so all of them give the same answer.
+
+- **Check**: a message, phone number, UPI ID or link. You get the verdict, why, and what to do.
+- **Share menu**: in WhatsApp or SMS, long-press a message → Share → **Sachet**. It opens and
+  checks the message straight away.
+- **Report** a scam, **delete my data**, privacy notice, English / हिंदी switch.
+- **1930** button opens the dialer with the number filled in, so the app needs no phone permission.
+
+Not in this version (V3): call screening and reading SMS. Both need Play Store approval for
+sensitive permissions.
+
+## Layout
+
+```
+app/src/main/java/com/unfilteredengineers/sachet/
+  MainActivity.kt        start-up and the Share menu
+  data/SachetApi.kt      API client (OkHttp + kotlinx.serialization)
+  data/Models.kt         the API's JSON
+  data/Prefs.kt          random client ID and language, on this phone only
+  data/Input.kt          guess the identifier type, join shared text
+  i18n/Strings.kt        every text in English and Hindi (same as the website)
+  ui/                    view model and screens (Check, Report, Privacy)
+app/src/test/            unit tests (run on your computer, no phone needed)
+```
+
+## Build and test
+
+Needs JDK 17 and the Android SDK (Android Studio installs both).
+
+```bash
+cd frontend/android
+./gradlew testDebugUnitTest   # unit tests
+./gradlew lintDebug           # Android lint
+./gradlew assembleDebug       # APK in app/build/outputs/apk/debug/
+```
+
+Or open `frontend/android` in Android Studio and press ▶ Run.
+
+## Which API it talks to
+
+Set in `gradle.properties`:
+
+| Build   | Property                | Default                                                      |
+| ------- | ----------------------- | ------------------------------------------------------------ |
+| Debug   | `sachet.apiUrl.debug`   | `http://10.0.2.2:3000` (your laptop, seen from the emulator) |
+| Release | `sachet.apiUrl.release` | must be your Railway `https://` URL                          |
+
+On a real phone with a debug build: plug it in over USB with USB debugging on, run
+`adb reverse tcp:3000 tcp:3000`, and set `sachet.apiUrl.debug=http://localhost:3000`.
+
+## Security
+
+- **One permission: Internet.** No contacts, SMS, call log or location.
+- **HTTPS only in release.** Plain http is allowed only in debug builds, only to the laptop
+  addresses above. Certificates a user or an app added to the phone aren't trusted, so they
+  can't be used to read the traffic.
+- **No redirect from https down to http**, 20-second time limit on every call.
+- **Backups off.** The random client ID never goes to a cloud backup or a new phone.
+- **Shared text is untrusted.** It is only shown as text and sent to the API to check; it is
+  never opened, run or logged.
+- **Release builds are shrunk and obfuscated** (R8). The release build refuses to compile with a
+  non-https API URL.
+- Signing keys (`*.jks`, `*.keystore`) are git-ignored. Keep the release key outside the repo
+  and back it up: losing it means you can never update the app on the Play Store.

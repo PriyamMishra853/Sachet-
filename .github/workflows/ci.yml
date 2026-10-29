@@ -26,3 +26,32 @@ jobs:
       - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm --filter @sachet/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+  # The Android app: unit tests, Android lint, and a debug APK you can
+  # download from the run's Artifacts. GitHub's Ubuntu runners have the
+  # Android SDK installed.
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # Caches Gradle downloads between runs and checks the wrapper jar is genuine.
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sachet-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/*.apk

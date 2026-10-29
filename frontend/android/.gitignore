@@ -1,0 +1,11 @@
+# Build output and local machine settings (local.properties has your SDK path).
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+captures/
+# Signing keys must never be committed.
+*.jks
+*.keystore
