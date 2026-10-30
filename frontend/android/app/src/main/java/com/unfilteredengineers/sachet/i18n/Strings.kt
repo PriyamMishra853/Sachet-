@@ -24,8 +24,22 @@ object T {
         "मैसेज पेस्ट करें, या फोन नंबर, UPI ID या लिंक डालें। लगभग एक सेकंड में जवाब मिलेगा।",
     )
     val shareTip = Text2(
-        "Tip: in WhatsApp or SMS, long-press a message → Share → Sachet to check it straight away.",
-        "सुझाव: WhatsApp या SMS में मैसेज को दबाकर रखें → शेयर → Sachet, और तुरंत जांच हो जाएगी।",
+        "Tip: in WhatsApp or SMS, long-press a message → Share → Sachet to check it straight away. You can share a screenshot too.",
+        "सुझाव: WhatsApp या SMS में मैसेज को दबाकर रखें → शेयर → Sachet, और तुरंत जांच हो जाएगी। आप स्क्रीनशॉट भी शेयर कर सकते हैं।",
+    )
+    val screenshotButton = Text2("📷 Check a screenshot", "📷 स्क्रीनशॉट जांचें")
+    val readingScreenshot = Text2("Reading the screenshot…", "स्क्रीनशॉट पढ़ रहे हैं…")
+    val screenshotNote = Text2(
+        "The picture is read on your phone and never uploaded. Only the text in it is checked.",
+        "तस्वीर आपके फोन पर ही पढ़ी जाती है और कभी अपलोड नहीं होती। सिर्फ उसका टेक्स्ट जांचा जाता है।",
+    )
+    val screenshotNoText = Text2(
+        "Couldn't find any text in this picture. Paste the message instead.",
+        "इस तस्वीर में कोई टेक्स्ट नहीं मिला। मैसेज पेस्ट करके जांचें।",
+    )
+    val screenshotFailed = Text2(
+        "Couldn't read this picture. If you just installed Sachet, wait a minute and try again.",
+        "यह तस्वीर पढ़ नहीं पाए। अगर अभी Sachet इंस्टॉल किया है, तो एक मिनट रुककर फिर कोशिश करें।",
     )
     val tabMessage = Text2("Message", "मैसेज")
     val tabPhone = Text2("Phone", "फोन")
@@ -147,8 +161,16 @@ val PRIVACY_SECTIONS: List<Pair<Text2, List<Text2>>> = listOf(
             "For each check: the result (for example 'high risk'), the scam type, and the amount asked for, so we can count money protected.",
             "हर जांच के लिए: नतीजा (जैसे 'उच्च जोखिम'), धोखाधड़ी का प्रकार, और मांगी गई रकम, ताकि बचाए गए पैसों की गिनती हो सके।",
         ),
+        Text2(
+            "If you ask for a review of your own number, UPI ID or website (on the website): your reason, and the contact you give until the review is decided.",
+            "अगर आप (वेबसाइट पर) अपने नंबर, UPI ID या वेबसाइट की जांच का अनुरोध करते हैं: आपकी बताई वजह, और फैसला होने तक आपका दिया संपर्क।",
+        ),
     ),
     Text2("What we never store", "हम क्या कभी सेव नहीं करते") to listOf(
+        Text2(
+            "Screenshots you check: the picture is read on your phone by Google's ML Kit and never uploaded. Only the text found in it is checked, like a pasted message. ML Kit sends Google usage statistics, not the picture or its text.",
+            "आपके जांचे गए स्क्रीनशॉट: तस्वीर आपके फोन पर ही Google के ML Kit से पढ़ी जाती है और कभी अपलोड नहीं होती। उसमें मिला टेक्स्ट ही पेस्ट किए मैसेज की तरह जांचा जाता है। ML Kit Google को इस्तेमाल के आंकड़े भेजता है, तस्वीर या उसका टेक्स्ट नहीं।",
+        ),
         Text2(
             "Your phone number, contacts, SMS or call log: the app has no permission to read them. It keeps only a random ID on this phone so your reports are counted once, and the server stores just a scrambled code (a salted hash) of it.",
             "आपका फोन नंबर, कॉन्टैक्ट, SMS या कॉल लॉग: ऐप को इन्हें पढ़ने की अनुमति ही नहीं है। यह इस फोन पर सिर्फ एक रैंडम ID रखता है ताकि आपकी शिकायत एक ही बार गिनी जाए, और सर्वर उसका सिर्फ एक बदला हुआ कोड (salted hash) रखता है।",
@@ -162,6 +184,14 @@ val PRIVACY_SECTIONS: List<Pair<Text2, List<Text2>>> = listOf(
         Text2(
             "Links you check may be sent to Google Safe Browsing to see if Google knows they are dangerous.",
             "आपके जांचे गए लिंक Google Safe Browsing को भेजे जा सकते हैं, यह देखने के लिए कि Google उन्हें खतरनाक मानता है या नहीं।",
+        ),
+        Text2(
+            "Website names you check may be looked up in the public domain registration records (RDAP) to see how new the website is.",
+            "आपके जांचे गए वेबसाइट नाम सार्वजनिक डोमेन रजिस्ट्रेशन रिकॉर्ड (RDAP) में देखे जा सकते हैं, यह जानने के लिए कि वेबसाइट कितनी नई है।",
+        ),
+        Text2(
+            "If the AI check is switched on: message text you check, after removing the personal details we can find, may be sent to Anthropic's Claude AI for a second opinion. Sachet keeps only its yes/no answer, for up to 7 days.",
+            "अगर AI जांच चालू है: आपके जांचे गए मैसेज का टेक्स्ट, उसमें मिलने वाली निजी जानकारी हटाने के बाद, दूसरी राय के लिए Anthropic के Claude AI को भेजा जा सकता है। Sachet सिर्फ उसका हां/ना जवाब, अधिकतम 7 दिन रखता है।",
         ),
     ),
 )

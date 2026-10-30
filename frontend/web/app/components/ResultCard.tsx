@@ -29,6 +29,12 @@ export function ResultCard({ result, checked }: { result: CheckResult; checked: 
     if (result.checkId) void api.answerPaid(result.checkId, answer).catch(() => {});
   }
   const askPaid = result.checkId && (result.band === "high" || result.band === "medium");
+  // The owner of a flagged number, UPI ID or site can ask for a review. The
+  // value goes in the #fragment, which browsers never send to a server.
+  const appealHref =
+    checked.kind !== "message" && (result.band === "high" || result.band === "medium")
+      ? `/appeal#${new URLSearchParams({ type: checked.kind, value: checked.value })}`
+      : null;
 
   async function report() {
     setReportState("sending");
@@ -134,6 +140,11 @@ export function ResultCard({ result, checked }: { result: CheckResult; checked: 
           </button>
         )}
         {reportState === "error" && <p className="error">{tr("errorGeneric")}</p>}
+        {appealHref && (
+          <a href={appealHref} className="small appeal-link">
+            {tr("appealLink")}
+          </a>
+        )}
       </div>
     </section>
   );

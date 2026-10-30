@@ -1,6 +1,7 @@
 package com.unfilteredengineers.sachet.ui
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.unfilteredengineers.sachet.BuildConfig
@@ -12,6 +13,7 @@ import com.unfilteredengineers.sachet.data.MAX_MESSAGE_LENGTH
 import com.unfilteredengineers.sachet.data.Prefs
 import com.unfilteredengineers.sachet.data.ReportRequest
 import com.unfilteredengineers.sachet.data.SachetApi
+import com.unfilteredengineers.sachet.data.ScreenshotReader
 import com.unfilteredengineers.sachet.data.Stats
 import com.unfilteredengineers.sachet.data.guessType
 import com.unfilteredengineers.sachet.i18n.Lang
@@ -40,6 +42,8 @@ data class CheckUi(
     /** Optional SMS sender, for the Message tab. */
     val sender: String = "",
     val loading: Boolean = false,
+    /** Reading the text in a screenshot, before the check itself. */
+    val reading: Boolean = false,
     val error: Text2? = null,
     val result: CheckResult? = null,
     val checked: Checked? = null,
@@ -74,6 +78,7 @@ data class UiState(
 class SachetViewModel(app: Application) : AndroidViewModel(app) {
     private val prefs = Prefs(app)
     private val api = SachetApi(BuildConfig.API_URL, clientId = { prefs.clientId })
+    private val screenshots = ScreenshotReader(app)
 
     private val _state = MutableStateFlow(UiState(lang = prefs.lang))
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -112,6 +117,30 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
         if (text.isBlank()) return
         _state.update { it.copy(screen = Screen.CHECK, check = CheckUi(tab = Tab.MESSAGE, input = text)) }
         runCheck()
+    }
+
+    /** A screenshot of a message, shared or picked: read its text on the phone, then check it. */
+    fun checkScreenshot(uri: Uri) {
+        if (_state.value.check.loading) return
+        _state.update {
+            it.copy(screen = Screen.CHECK, check = CheckUi(tab = Tab.MESSAGE, loading = true, reading = true))
+        }
+        viewModelScope.launch {
+            val text = runCatching { screenshots.read(uri) }
+            val error = when {
+                text.isFailure -> T.screenshotFailed
+                text.getOrNull().isNullOrBlank() -> T.screenshotNoText
+                else -> null
+            }
+            _state.update {
+                it.copy(check = it.check.copy(loading = false, reading = false, input = text.getOrDefault(""), error = error))
+            }
+            if (error == null) runCheck()
+        }
+    }
+
+    override fun onCleared() {
+        screenshots.close()
     }
 
     fun runCheck() {

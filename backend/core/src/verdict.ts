@@ -1,5 +1,6 @@
 import type { TextAnalysis } from "./analyze.js";
 import { worstBand } from "./band.js";
+import { NEW_DOMAIN_DAYS } from "./domains.js";
 import { SCAM_RULES } from "./rules.js";
 import type { SenderInfo } from "./sender.js";
 import { SIGNAL_TEXT } from "./signals.js";
@@ -17,6 +18,21 @@ export type IdentifierLookup = {
   /** True when Google Safe Browsing lists this URL. */
   safeBrowsingHit?: boolean;
   scamType?: ScamType | null;
+  /** "open": the owner asked for a review. "cleared": an appeal was upheld and older reports were set aside. */
+  review?: "open" | "cleared" | null;
+  /** Websites only: days since the name was registered (RDAP), when known. */
+  domainAgeDays?: number | null;
+};
+
+/**
+ * A second opinion on the message text from an AI model. It can raise the band
+ * to medium, never higher and never lower: the rules and reports stay in charge,
+ * and a message written to fool the model can at worst add one warning.
+ */
+export type AiOpinion = {
+  scam: boolean;
+  scamType: ScamType | null;
+  confidence: "low" | "medium" | "high";
 };
 
 export type Verdict = {
@@ -36,13 +52,22 @@ export function identifierBand(l: IdentifierLookup): RiskBand {
   if (l.safeBrowsingHit) return "high";
   const fromReports: RiskBand =
     l.reportCount >= HIGH_RISK_REPORTS ? "high" : l.reportCount >= 1 ? "medium" : "unknown";
-  return worstBand([l.storedBand, fromReports]);
+  return worstBand([l.storedBand, fromReports, isNewDomain(l) ? "medium" : "unknown"]);
 }
+
+const isNewDomain = (l: IdentifierLookup) =>
+  l.kind === "domain" && l.domainAgeDays != null && l.domainAgeDays < NEW_DOMAIN_DAYS;
 
 const KIND_NAME: Record<IdentifierKind, Text2> = {
   phone: { en: "This phone number", hi: "यह फोन नंबर" },
   upi: { en: "This UPI ID", hi: "यह UPI ID" },
   domain: { en: "This website", hi: "यह वेबसाइट" },
+};
+// Hindi uses "इस" instead of "यह" before को, ने, में ("इस नंबर को").
+const KIND_NAME_OBLIQUE: Record<IdentifierKind, string> = {
+  phone: "इस फोन नंबर",
+  upi: "इस UPI ID",
+  domain: "इस वेबसाइट",
 };
 
 export const HELPLINE: Text2 = {
@@ -55,6 +80,15 @@ export const HELPLINE: Text2 = {
 export const SUSPECT_SEARCH: Text2 = {
   en: 'You can also search this number or UPI ID at cybercrime.gov.in → "Report & Check Suspect", to see if others complained to the police.',
   hi: 'आप cybercrime.gov.in → "Report & Check Suspect" पर यह नंबर या UPI ID खोजकर भी देख सकते हैं कि किसी ने पुलिस से इसकी शिकायत की है या नहीं।',
+};
+
+const UNDER_REVIEW: Text2 = {
+  en: "Its owner says these reports are wrong. Sachet is reviewing them.",
+  hi: "इसके मालिक का कहना है कि ये शिकायतें गलत हैं। Sachet इनकी जांच कर रहा है।",
+};
+const CLEARED: Text2 = {
+  en: "Earlier reports about it were set aside after a review. Only newer reports count.",
+  hi: "जांच के बाद इसकी पुरानी शिकायतें हटा दी गईं। अब सिर्फ नई शिकायतें गिनी जाती हैं।",
 };
 
 const BAND_ADVICE: Record<RiskBand, Text2> = {
@@ -81,9 +115,12 @@ const BAND_ADVICE: Record<RiskBand, Text2> = {
 export function buildVerdict(input: {
   lookups?: IdentifierLookup[];
   text?: TextAnalysis | null;
+  ai?: AiOpinion | null;
 }): Verdict {
   const lookups = input.lookups ?? [];
   const text = input.text ?? null;
+  // A low-confidence "scam" is ignored: a false alarm costs trust.
+  const ai = input.ai?.scam && input.ai.confidence !== "low" ? input.ai : null;
   const reasons: Text2[] = [];
   const bands: RiskBand[] = [];
   let reportCount = 0;
@@ -112,12 +149,25 @@ export function buildVerdict(input: {
       const people = l.reportCount === 1 ? "1 person" : `${l.reportCount} people`;
       reasons.push({
         en: `${who.en} was reported as a scam by ${people}.`,
-        hi: `${who.hi} को ${l.reportCount} ${l.reportCount === 1 ? "व्यक्ति" : "लोगों"} ने धोखाधड़ी बताया है।`,
+        hi: `${KIND_NAME_OBLIQUE[l.kind]} को ${l.reportCount} ${l.reportCount === 1 ? "व्यक्ति" : "लोगों"} ने धोखाधड़ी बताया है।`,
       });
     }
+    if (isNewDomain(l)) {
+      const days = l.domainAgeDays!;
+      const ago = days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+      const agoHi = days === 0 ? "आज ही" : days === 1 ? "कल ही" : `${days} दिन पहले ही`;
+      reasons.push({
+        en: `This website (${l.value}) was registered ${ago}. Scam websites are usually new.`,
+        hi: `यह वेबसाइट (${l.value}) ${agoHi} बनी है। धोखाधड़ी वाली वेबसाइटें अक्सर नई होती हैं।`,
+      });
+    }
+    // Information only: a pending review never lowers the band, or every
+    // scammer would file one.
+    if (l.review === "open") reasons.push(UNDER_REVIEW);
+    if (l.review === "cleared") reasons.push(CLEARED);
   }
 
-  const scamType = text?.scamType ?? reportedType;
+  const scamType = text?.scamType ?? reportedType ?? ai?.scamType ?? null;
   if (text) {
     bands.push(text.band);
     if (text.scamType) {
@@ -128,6 +178,14 @@ export function buildVerdict(input: {
       });
     }
     for (const s of text.signals) reasons.push(SIGNAL_TEXT[s]);
+  }
+  if (ai) {
+    bands.push("medium");
+    const rule = SCAM_RULES.find((r) => r.type === ai.scamType);
+    reasons.push({
+      en: `An AI check also reads this as a likely ${rule?.name.en ?? "scam"}.`,
+      hi: `AI जांच भी इसे संभावित ${rule?.name.hi ?? "धोखाधड़ी"} मानती है।`,
+    });
   }
 
   const band = worstBand(bands);

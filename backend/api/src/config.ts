@@ -15,6 +15,15 @@ const schema = z.object({
   // Salt for hashing user IDs. Changing it later breaks report counting.
   HASH_SALT: z.string().min(16).optional(),
   SAFE_BROWSING_API_KEY: z.string().optional(),
+  // AI second opinion on message text (Anthropic's Claude). Off by default: it
+  // costs money per check and sends redacted message text to Anthropic.
+  AI_CHECK: z.enum(["on", "off"]).default("off"),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  AI_CHECK_MODEL: z.string().default("claude-opus-5-5"),
+  // How long a check waits for the AI before answering without it.
+  AI_CHECK_WAIT_MS: z.coerce.number().int().min(500).max(15_000).default(3000),
+  // Look up when a website was registered (public RDAP records, no key). "off" to stop.
+  DOMAIN_AGE_LOOKUP: z.enum(["on", "off"]).default("on"),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   // Telegram allows A-Z, a-z, 0-9, _ and -. Short secrets can be guessed.
   TELEGRAM_WEBHOOK_SECRET: z
@@ -25,6 +34,11 @@ const schema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
   WHATSAPP_APP_SECRET: z.string().optional(),
+  // Switches on the operator routes (deciding appeals). Long and random.
+  ADMIN_TOKEN: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{32,256}$/, "use 32+ letters/digits: openssl rand -hex 32")
+    .optional(),
   // Comma-separated web origins allowed to call the API from a browser.
   CORS_ORIGINS: z.string().default("http://localhost:3001"),
   // Proxies in front of the API. Default: 1 in production (Railway/Render), 0 locally.
@@ -42,6 +56,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const production = parsed.NODE_ENV === "production";
   if (production && (!parsed.HASH_SALT || parsed.HASH_SALT.length < 32)) {
     throw new Error("HASH_SALT must be set in production, 32+ characters: openssl rand -hex 32");
+  }
+  if (parsed.AI_CHECK === "on" && !parsed.ANTHROPIC_API_KEY) {
+    throw new Error("AI_CHECK=on needs ANTHROPIC_API_KEY (or set AI_CHECK=off)");
   }
   if (production && parsed.CORS_ORIGINS.split(",").some((o) => o.trim() === "*")) {
     throw new Error("CORS_ORIGINS can't be * in production; list the web app's address");

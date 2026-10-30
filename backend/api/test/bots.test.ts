@@ -51,6 +51,16 @@ describe("conversation", () => {
     expect(card!.text).toContain("came from an ordinary phone number");
   });
 
+  it("shows the privacy notice in the chosen language", async () => {
+    const { conversation, msg } = setup();
+    const [en] = await conversation.handleText(msg(), "/privacy");
+    expect(en!.text).toContain("salted hash");
+    expect(en!.text).toContain("/delete");
+    await conversation.handleButton(msg(), "lang:hi");
+    const [hi] = await conversation.handleText(msg(), "/privacy");
+    expect(hi!.text).toContain("गोपनीयता");
+  });
+
   it("switches to Hindi", async () => {
     const { conversation, msg } = setup();
     expect((await conversation.handleButton(msg(), "lang:hi"))[0]!.text).toBe(

@@ -6,6 +6,10 @@ bots, so all of them give the same answer.
 - **Check**: a message, phone number, UPI ID or link. You get the verdict, why, and what to do.
 - **Share menu**: in WhatsApp or SMS, long-press a message → Share → **Sachet**. It opens and
   checks the message straight away.
+- **Screenshots**: share a screenshot to Sachet, or tap **📷 Check a screenshot**. ML Kit reads
+  its Hindi and English text on the phone (the picture is never uploaded) and checks the text.
+  The reading model comes through Google Play services, so the APK stays small; on a phone
+  without Play services this one feature says it can't read the picture.
 - **Report** a scam, **delete my data**, privacy notice, English / हिंदी switch.
 - **1930** button opens the dialer with the number filled in, so the app needs no phone permission.
 
@@ -21,6 +25,8 @@ app/src/main/java/com/unfilteredengineers/sachet/
   data/Models.kt         the API's JSON
   data/Prefs.kt          random client ID and language, on this phone only
   data/Input.kt          guess the identifier type, join shared text
+  data/ScreenshotReader.kt  read a screenshot's text on the phone (ML Kit)
+  data/ScreenshotText.kt    drop the status bar and app buttons from that text
   i18n/Strings.kt        every text in English and Hindi (same as the website)
   ui/                    view model and screens (Check, Report, Privacy)
 app/src/test/            unit tests (run on your computer, no phone needed)
@@ -70,7 +76,12 @@ Play Store app can never be updated again.
 
 ## Security
 
-- **One permission: Internet.** No contacts, SMS, call log or location.
+- **Permissions: Internet, and "view network connections"** (`ACCESS_NETWORK_STATE`, added by
+  ML Kit to see whether the phone is online). No contacts, SMS, call log, location or gallery:
+  screenshots come through the Share menu or Android's photo picker, which need no permission.
+- **Screenshots stay on the phone.** ML Kit reads them on the device; Google's ML Kit does send
+  Google usage and performance statistics, but not the picture or its text. Only `content://`
+  pictures from other apps are read, never `file://` (which could point at Sachet's own files).
 - **HTTPS only in release.** Plain http is allowed only in debug builds, only to the laptop
   addresses above. Certificates a user or an app added to the phone aren't trusted, so they
   can't be used to read the traffic.

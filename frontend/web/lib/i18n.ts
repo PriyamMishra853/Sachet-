@@ -86,6 +86,42 @@ export const t = {
     hi: "पैसे गए? अभी 1930 पर कॉल करें या cybercrime.gov.in पर शिकायत करें",
   },
   unknown: { en: "Not sure", hi: "पता नहीं" },
+  appealLink: {
+    en: "Is this your own number, UPI ID or website? Ask for a review",
+    hi: "क्या यह आपका अपना नंबर, UPI ID या वेबसाइट है? जांच का अनुरोध करें",
+  },
+  appealTitle: { en: "Ask for a review", hi: "जांच का अनुरोध करें" },
+  appealIntro: {
+    en: "Is your own number, UPI ID or website marked as a scam by mistake? Tell us why. A person reads the reports and decides. Until then, Sachet shows that a review is open.",
+    hi: "क्या आपका अपना नंबर, UPI ID या वेबसाइट गलती से धोखाधड़ी बताया गया है? हमें वजह बताएं। एक व्यक्ति शिकायतें पढ़कर फैसला करेगा। तब तक Sachet दिखाएगा कि जांच चल रही है।",
+  },
+  appealWhat: { en: "Your number, UPI ID or website", hi: "आपका नंबर, UPI ID या वेबसाइट" },
+  appealReason: { en: "Why are the reports wrong?", hi: "शिकायतें गलत क्यों हैं?" },
+  appealReasonHint: {
+    en: "For example: what your business is, and what may have led to the reports.",
+    hi: "जैसे: आपका काम क्या है, और शिकायतें किस वजह से हुई होंगी।",
+  },
+  appealContact: {
+    en: "Email or phone to reach you (optional)",
+    hi: "आपसे संपर्क के लिए ईमेल या फोन (वैकल्पिक)",
+  },
+  appealContactNote: {
+    en: "Only used to ask you about this review, and deleted once it is decided.",
+    hi: "सिर्फ इस जांच के बारे में पूछने के लिए, और फैसला होते ही मिटा दिया जाता है।",
+  },
+  appealSubmit: { en: "Ask for a review", hi: "जांच का अनुरोध भेजें" },
+  appealDone: {
+    en: "Thank you. Your request is in. A person will review it, and checks now show that a review is open.",
+    hi: "धन्यवाद। आपका अनुरोध मिल गया है। एक व्यक्ति इसकी जांच करेगा, और अब जांच में दिखेगा कि समीक्षा चल रही है।",
+  },
+  appealNotListed: {
+    en: "Sachet has no reports about this, so there is nothing to review.",
+    hi: "Sachet पर इसकी कोई शिकायत नहीं है, इसलिए जांच के लिए कुछ नहीं है।",
+  },
+  appealAlreadyOpen: {
+    en: "A review for this is already open. We'll decide it soon.",
+    hi: "इसकी जांच पहले से चल रही है। हम जल्द फैसला करेंगे।",
+  },
   installWhy: {
     en: "Install Sachet on your phone. Then in WhatsApp or SMS, long-press a message → Share → Sachet to check it.",
     hi: "Sachet को फोन में इंस्टॉल करें। फिर WhatsApp या SMS में मैसेज को दबाकर रखें → शेयर → Sachet, और जांच हो जाएगी।",

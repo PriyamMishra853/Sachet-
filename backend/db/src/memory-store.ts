@@ -1,22 +1,48 @@
 import { randomUUID } from "node:crypto";
 import type { ScamType } from "@sachet/core";
-import type { NewCheck, NewReport, Store, StoredIdentifier } from "./store.js";
+import type {
+  AppealRecord,
+  NewAppeal,
+  NewCheck,
+  NewReport,
+  Store,
+  StoredIdentifier,
+} from "./store.js";
+
+type IdentifierEntry = Omit<StoredIdentifier, "reportCount" | "scamType" | "review"> & {
+  /** `tick` of the upheld appeal; reports at or before it don't count. */
+  clearedAt?: number;
+};
 
 // In-memory Store with the same behaviour as the Postgres one. Used when
 // DATABASE_URL is not set (local dev before Supabase exists) and in API
 // tests. Data is lost on restart.
 export function createMemoryStore(): Store {
-  const identifiers = new Map<string, Omit<StoredIdentifier, "reportCount" | "scamType">>();
-  const reports = new Map<string, NewReport & { id: string }>();
+  const identifiers = new Map<string, IdentifierEntry>();
+  const reports = new Map<string, NewReport & { id: string; at: number; createdAt: Date }>();
   const reportByKey = new Map<string, string>();
   const checks = new Map<
     string,
     NewCheck & { id: string; createdAt: Date; followupSentAt?: Date; userPaid?: "yes" | "no" }
   >();
+  const appeals = new Map<
+    string,
+    NewAppeal & Pick<AppealRecord, "id" | "status" | "decisionNote" | "createdAt" | "resolvedAt">
+  >();
   const key = (kind: string, value: string) => `${kind}:${value}`;
+  // A counter instead of the clock orders reports and appeal decisions, so two
+  // things in the same millisecond still have a clear before and after.
+  let tick = 0;
 
-  const reportsFor = (k: string) =>
-    [...reports.values()].filter((r) => r.identifiers.some((i) => key(i.kind, i.value) === k));
+  const reportsFor = (k: string) => {
+    const cleared = identifiers.get(k)?.clearedAt ?? -1;
+    return [...reports.values()].filter(
+      (r) => r.at > cleared && r.identifiers.some((i) => key(i.kind, i.value) === k),
+    );
+  };
+  const reportCount = (k: string) => new Set(reportsFor(k).map((r) => r.reporterHash)).size;
+  const openAppealFor = (k: string) =>
+    [...appeals.values()].find((a) => a.status === "open" && key(a.kind, a.value) === k);
 
   const mostCommon = (types: ScamType[]): ScamType | null => {
     const counts = new Map<ScamType, number>();
@@ -34,10 +60,12 @@ export function createMemoryStore(): Store {
         const row = identifiers.get(k);
         if (!row) continue;
         const rs = reportsFor(k);
+        const { clearedAt, ...stored } = row;
         out.push({
-          ...row,
-          reportCount: new Set(rs.map((r) => r.reporterHash)).size,
+          ...stored,
+          reportCount: reportCount(k),
           scamType: mostCommon(rs.flatMap((r) => (r.scamType ? [r.scamType] : []))),
+          review: openAppealFor(k) ? "open" : clearedAt !== undefined ? "cleared" : null,
         });
       }
       return out;
@@ -47,7 +75,7 @@ export function createMemoryStore(): Store {
       const existing = reportByKey.get(r.idempotencyKey);
       if (existing) return { reportId: existing, duplicate: true };
       const id = randomUUID();
-      reports.set(id, { ...r, id });
+      reports.set(id, { ...r, id, at: ++tick, createdAt: new Date() });
       reportByKey.set(r.idempotencyKey, id);
       for (const i of r.identifiers) {
         const k = key(i.kind, i.value);
@@ -90,7 +118,9 @@ export function createMemoryStore(): Store {
 
     async upsertSeed(entries) {
       for (const e of entries) {
-        identifiers.set(key(e.kind, e.value), {
+        const k = key(e.kind, e.value);
+        identifiers.set(k, {
+          ...identifiers.get(k),
           kind: e.kind,
           value: e.value,
           riskBand: e.riskBand,
@@ -115,7 +145,86 @@ export function createMemoryStore(): Store {
           nChecks++;
         }
       }
-      return { reports: nReports, checks: nChecks };
+      let nAppeals = 0;
+      for (const [id, a] of appeals) {
+        if (a.appellantHash === userHash) {
+          appeals.delete(id);
+          nAppeals++;
+        }
+      }
+      return { reports: nReports, checks: nChecks, appeals: nAppeals };
+    },
+
+    async createAppeal(a) {
+      const k = key(a.kind, a.value);
+      const row = identifiers.get(k);
+      const listed =
+        row && (reportCount(k) > 0 || row.riskBand === "medium" || row.riskBand === "high");
+      if (!listed) return { ok: false, error: "not_listed" };
+      if (openAppealFor(k)) return { ok: false, error: "already_open" };
+      const id = randomUUID();
+      appeals.set(id, {
+        ...a,
+        id,
+        status: "open",
+        decisionNote: null,
+        createdAt: new Date().toISOString(),
+        resolvedAt: null,
+      });
+      return { ok: true, appealId: id };
+    },
+
+    async listAppeals(status, limit) {
+      return [...appeals.values()]
+        .filter((a) => a.status === status)
+        .slice(0, limit)
+        .map((a) => {
+          const k = key(a.kind, a.value);
+          const row = identifiers.get(k)!;
+          const recent = [...reports.values()]
+            .filter((r) => r.identifiers.some((i) => key(i.kind, i.value) === k))
+            .sort((x, y) => y.at - x.at)
+            .slice(0, 5);
+          return {
+            id: a.id,
+            identifier: {
+              kind: a.kind,
+              value: a.value,
+              reportCount: reportCount(k),
+              riskBand: row.riskBand,
+              source: row.source,
+            },
+            reason: a.reason,
+            contact: a.contact,
+            status: a.status,
+            decisionNote: a.decisionNote,
+            createdAt: a.createdAt,
+            resolvedAt: a.resolvedAt,
+            recentReports: recent.map((r) => ({
+              channel: r.channel,
+              scamType: r.scamType,
+              textRedacted: r.textRedacted,
+              createdAt: r.createdAt.toISOString(),
+            })),
+          };
+        });
+    },
+
+    async resolveAppeal(id, decision, note) {
+      const a = appeals.get(id);
+      if (!a || a.status !== "open") return null;
+      a.status = decision;
+      a.decisionNote = note;
+      a.resolvedAt = new Date().toISOString();
+      a.contact = null;
+      if (decision === "upheld") {
+        const row = identifiers.get(key(a.kind, a.value));
+        if (row) {
+          row.clearedAt = ++tick;
+          row.riskBand = "unknown";
+        }
+      }
+      return { kind: a.kind, value: a.value };
     },
 
     async stats() {

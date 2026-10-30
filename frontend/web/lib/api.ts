@@ -19,6 +19,24 @@ export type CheckResult = {
 };
 export type IdType = "phone" | "upi" | "url";
 export type Stats = { checks: number; reports: number; moneyProtectedInr: number };
+export type AppealStatus = "open" | "upheld" | "rejected";
+/** What the operator sees for one appeal (GET /v1/admin/appeals). */
+export type AdminAppeal = {
+  id: string;
+  identifier: { kind: string; value: string; reportCount: number; riskBand: Band; source: string };
+  reason: string;
+  contact: string | null;
+  status: AppealStatus;
+  decisionNote: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  recentReports: {
+    channel: string;
+    scamType: string | null;
+    textRedacted: string | null;
+    createdAt: string;
+  }[];
+};
 
 export class ApiError extends Error {
   constructor(
@@ -93,6 +111,23 @@ export const api = {
       body: JSON.stringify({ paid }),
     }),
   stats: () => call<Stats>("/v1/stats"),
+  appeal: (body: { type: IdType; value: string; reason: string; contact?: string }) =>
+    call<{ appealId: string }>("/v1/appeals", { method: "POST", body: JSON.stringify(body) }),
+};
+
+// Operator calls. The token is typed in on /admin and only kept in memory.
+const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+export const adminApi = {
+  appeals: (token: string, status: AppealStatus) =>
+    call<{ appeals: AdminAppeal[] }>(`/v1/admin/appeals?status=${status}`, {
+      headers: bearer(token),
+    }),
+  decide: (token: string, id: string, decision: "upheld" | "rejected", note: string) =>
+    call<{ status: string }>(`/v1/admin/appeals/${encodeURIComponent(id)}`, {
+      method: "POST",
+      headers: bearer(token),
+      body: JSON.stringify({ decision, note: note.trim() || undefined }),
+    }),
 };
 
 /** Guesses whether a typed value is a phone, UPI ID or link. */

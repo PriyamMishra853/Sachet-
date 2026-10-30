@@ -14,6 +14,8 @@ import {
 import type { IdentifierRef, Store } from "@sachet/db";
 import type { FastifyBaseLogger } from "fastify";
 import type { Cache } from "../cache.js";
+import type { AiCheck } from "./ai-check.js";
+import type { DomainAge } from "./domain-age.js";
 import type { SafeBrowsing } from "./safe-browsing.js";
 
 export type CheckType = "phone" | "upi" | "url";
@@ -29,7 +31,17 @@ export const REPORTS_PER_HOUR = 20;
 const NETWORK_REPORT_TTL = 30 * 24 * 3600;
 
 type Ref = IdentifierRef & { url?: string };
-const cacheKey = (r: IdentifierRef) => `id:${r.kind}:${r.value}`;
+/** Where a verdict for one identifier is cached. Anything that changes it must delete this key. */
+export const cacheKey = (r: IdentifierRef) => `id:${r.kind}:${r.value}`;
+
+/** Reads what a person typed as a phone number, UPI ID or link. */
+export function normalizeInput(type: CheckType, raw: string) {
+  return type === "phone"
+    ? normalizePhone(raw)
+    : type === "upi"
+      ? normalizeUpi(raw)
+      : normalizeUrl(raw);
+}
 
 // The one place that turns input into a verdict. The HTTP routes and both
 // bots call this, so every channel gives the same answer.
@@ -37,12 +49,17 @@ export function createChecker(deps: {
   store: Store;
   cache: Cache;
   safeBrowsing: SafeBrowsing;
+  /** Registration dates of websites (RDAP). Without it, no "new website" warning. */
+  domainAge?: DomainAge;
+  /** Second opinion on message text from an AI model. Without it, rules only. */
+  aiCheck?: AiCheck;
   log: FastifyBaseLogger;
 }) {
   const { store, cache, safeBrowsing, log } = deps;
+  const domainAge = deps.domainAge ?? { check: async () => new Map<string, number>() };
 
-  // Cache-aside: read the cache; on a miss read the database (and Safe
-  // Browsing for links), then fill the cache for 10 minutes.
+  // Cache-aside: read the cache; on a miss read the database (and, for links,
+  // Safe Browsing and the registration records), then fill the cache for 10 minutes.
   async function lookup(refs: Ref[]): Promise<IdentifierLookup[]> {
     const out: IdentifierLookup[] = [];
     const misses: Ref[] = [];
@@ -55,9 +72,10 @@ export function createChecker(deps: {
     }
     if (misses.length === 0) return out;
 
-    const [stored, flaggedUrls] = await Promise.all([
+    const [stored, flaggedUrls, ages] = await Promise.all([
       store.lookup(misses.map(({ kind, value }) => ({ kind, value }))),
       safeBrowsing.check(misses.flatMap((r) => (r.url ? [r.url] : []))),
+      domainAge.check(misses.flatMap((r) => (r.kind === "domain" ? [r.value] : []))),
     ]);
 
     for (const ref of misses) {
@@ -71,6 +89,8 @@ export function createChecker(deps: {
         source: row?.source ?? null,
         scamType: row?.scamType ?? null,
         safeBrowsingHit: sbHit,
+        review: row?.review ?? null,
+        ...(ref.kind === "domain" && { domainAgeDays: ages.get(ref.value) ?? null }),
       };
       if (sbHit && row?.source !== "seed") {
         // Remember Google's answer so the next check doesn't need to ask.
@@ -123,12 +143,7 @@ export function createChecker(deps: {
 
   return {
     async checkIdentifier(type: CheckType, raw: string, ctx: Ctx) {
-      const norm =
-        type === "phone"
-          ? normalizePhone(raw)
-          : type === "upi"
-            ? normalizeUpi(raw)
-            : normalizeUrl(raw);
+      const norm = normalizeInput(type, raw);
       if (!norm.ok) return { ok: false as const, reason: norm.reason };
       // Links keep their full URL for Safe Browsing; phones and UPI IDs have none.
       const ref: Ref = { kind: norm.kind, value: norm.value };
@@ -142,10 +157,13 @@ export function createChecker(deps: {
     /** `sender`: what the phone shows as the SMS sender ("VM-HDFCBK-S" or a number), if known. */
     async checkMessage(text: string, ctx: Ctx, sender?: string | null) {
       const analysis = analyzeText(text, { sender });
-      const verdict = buildVerdict({
-        lookups: await lookup(refsFromText(analysis)),
-        text: analysis,
-      });
+      // Only when the rules aren't already sure: each opinion costs money and time.
+      const askAi = deps.aiCheck && analysis.band !== "high";
+      const [lookups, ai] = await Promise.all([
+        lookup(refsFromText(analysis)),
+        askAi ? deps.aiCheck!.opinion(text) : null,
+      ]);
+      const verdict = buildVerdict({ lookups, text: analysis, ai });
       const amount = analysis.extracted.amounts.length
         ? Math.max(...analysis.extracted.amounts)
         : null;
@@ -165,12 +183,7 @@ export function createChecker(deps: {
     ) {
       const refs: Ref[] = [];
       for (const i of input.identifiers ?? []) {
-        const n =
-          i.type === "phone"
-            ? normalizePhone(i.value)
-            : i.type === "upi"
-              ? normalizeUpi(i.value)
-              : normalizeUrl(i.value);
+        const n = normalizeInput(i.type, i.value);
         if (!n.ok)
           return {
             ok: false as const,

@@ -13,6 +13,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "eval": "pnpm --filter @sachet/core eval",
+    "eval:ai": "tsx backend/api/scripts/eval-ai.ts",
     "dev:api": "pnpm --filter @sachet/api dev",
     "dev:web": "pnpm --filter @sachet/web dev",
     "db:migrate": "pnpm --filter @sachet/db migrate",

@@ -2,15 +2,23 @@ import cors from "@fastify/cors";
 import type { Store } from "@sachet/db";
 import Fastify, { type FastifyError, type FastifyServerOptions } from "fastify";
 import type { Cache } from "./cache.js";
-import { createChecker } from "./services/checker.js";
-import type { SafeBrowsing } from "./services/safe-browsing.js";
+import { adminRoutes } from "./routes/admin.js";
 import { v1Routes } from "./routes/v1.js";
+import { createAppeals } from "./services/appeals.js";
+import { createChecker } from "./services/checker.js";
+import type { AiCheck } from "./services/ai-check.js";
+import type { DomainAge } from "./services/domain-age.js";
+import type { SafeBrowsing } from "./services/safe-browsing.js";
 import { addSecurityHeaders } from "./security.js";
 
 export type AppDeps = {
   store: Store;
   cache: Cache;
   safeBrowsing: SafeBrowsing;
+  /** Website registration dates (RDAP). Optional: without it, no "new website" warning. */
+  domainAge?: DomainAge;
+  /** AI second opinion on messages. Optional: off unless AI_CHECK=on with a key. */
+  aiCheck?: AiCheck;
   salt: string;
   corsOrigins?: string[];
   /**
@@ -19,6 +27,8 @@ export type AppDeps = {
    * whole header would let anyone fake their IP and dodge the rate limits.
    */
   trustProxyHops?: number;
+  /** Switches on the operator routes (/v1/admin/...). Without it they don't exist. */
+  adminToken?: string;
 };
 
 // Requests are small JSON (a message is at most 4,000 characters).
@@ -60,7 +70,9 @@ export function buildApp(deps: AppDeps, opts: FastifyServerOptions = {}) {
     return reply.code(ok ? 200 : 503).send({ status: ok ? "ok" : "degraded", db, cache });
   });
 
-  v1Routes(app, { checker, cache: deps.cache, store: deps.store, salt: deps.salt });
+  const appeals = createAppeals({ store: deps.store, cache: deps.cache });
+  v1Routes(app, { checker, appeals, cache: deps.cache, store: deps.store, salt: deps.salt });
+  if (deps.adminToken) adminRoutes(app, { appeals, cache: deps.cache, token: deps.adminToken });
 
   return app;
 }

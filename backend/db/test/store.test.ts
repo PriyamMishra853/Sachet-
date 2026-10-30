@@ -5,6 +5,7 @@ import {
   createPgStore,
   migrate,
   parseFeed,
+  type NewAppeal,
   type NewReport,
   type Sql,
   type Store,
@@ -52,7 +53,14 @@ describe.each([
     const { duplicate } = await store.createReport(report());
     expect(duplicate).toBe(false);
     expect(await store.lookup([UPI])).toEqual([
-      { ...UPI, reportCount: 1, riskBand: "unknown", source: "user", scamType: "parcel" },
+      {
+        ...UPI,
+        reportCount: 1,
+        riskBand: "unknown",
+        source: "user",
+        scamType: "parcel",
+        review: null,
+      },
     ]);
   });
 
@@ -116,6 +124,7 @@ describe.each([
         riskBand: "high",
         source: "seed",
         scamType: null,
+        review: null,
       },
     ]);
   });
@@ -187,8 +196,98 @@ describe.each([
       scamType: null,
       amountInr: null,
     });
-    expect(await store.deleteUserData("a")).toEqual({ reports: 1, checks: 1 });
+    expect(await store.deleteUserData("a")).toEqual({ reports: 1, checks: 1, appeals: 0 });
     expect((await store.lookup([UPI]))[0]?.reportCount).toBe(1);
+  });
+
+  describe("appeals", () => {
+    const appeal = (over: Partial<NewAppeal> = {}): NewAppeal => ({
+      ...UPI,
+      appellantHash: "owner",
+      reason: "This is my shop's UPI ID; a customer who didn't get a refund reported it.",
+      contact: "owner@example.com",
+      ...over,
+    });
+
+    it("can't appeal something Sachet doesn't warn about", async () => {
+      expect(await store.createAppeal(appeal())).toEqual({ ok: false, error: "not_listed" });
+    });
+
+    it("keeps one open appeal per identifier and shows it as under review", async () => {
+      await store.createReport(report());
+      const first = await store.createAppeal(appeal());
+      expect(first.ok).toBe(true);
+      expect(await store.createAppeal(appeal({ appellantHash: "x" }))).toEqual({
+        ok: false,
+        error: "already_open",
+      });
+      expect((await store.lookup([UPI]))[0]?.review).toBe("open");
+    });
+
+    it("lists open appeals with the newest reports for the reviewer", async () => {
+      await store.createReport(report({ reporterHash: "a" }));
+      await store.createReport(report({ reporterHash: "b", textRedacted: "second report" }));
+      await store.createAppeal(appeal());
+      const [a] = await store.listAppeals("open", 10);
+      expect(a).toMatchObject({
+        identifier: { ...UPI, reportCount: 2, riskBand: "unknown", source: "user" },
+        contact: "owner@example.com",
+        status: "open",
+        resolvedAt: null,
+      });
+      expect(a!.recentReports.map((r) => r.textRedacted)).toEqual([
+        "second report",
+        "Pay customs duty to customs.clear@ybl",
+      ]);
+      expect(await store.listAppeals("upheld", 10)).toEqual([]);
+    });
+
+    it("upheld: earlier reports stop counting, later ones still count", async () => {
+      for (const who of ["a", "b", "c"]) await store.createReport(report({ reporterHash: who }));
+      const created = await store.createAppeal(appeal());
+      if (!created.ok) throw new Error("appeal not created");
+
+      expect(await store.resolveAppeal(created.appealId, "upheld", "honest shop")).toEqual(UPI);
+      const [after] = await store.lookup([UPI]);
+      expect(after).toMatchObject({ reportCount: 0, scamType: null, review: "cleared" });
+
+      await store.createReport(report({ reporterHash: "d" }));
+      expect((await store.lookup([UPI]))[0]?.reportCount).toBe(1);
+    });
+
+    it("upheld: a blocklist entry drops to unknown", async () => {
+      const site = { kind: "domain", value: "fixed-shop.in" } as const;
+      await store.upsertSeed([{ ...site, source: "seed", riskBand: "high" }]);
+      const created = await store.createAppeal(appeal({ ...site }));
+      if (!created.ok) throw new Error("appeal not created");
+      await store.resolveAppeal(created.appealId, "upheld", null);
+      expect((await store.lookup([site]))[0]).toMatchObject({ riskBand: "unknown" });
+    });
+
+    it("rejected: reports keep counting; the contact is dropped; it can't be decided twice", async () => {
+      await store.createReport(report());
+      const created = await store.createAppeal(appeal());
+      if (!created.ok) throw new Error("appeal not created");
+      await store.resolveAppeal(created.appealId, "rejected", "reports look genuine");
+      expect(await store.resolveAppeal(created.appealId, "upheld", null)).toBeNull();
+
+      expect((await store.lookup([UPI]))[0]).toMatchObject({ reportCount: 1, review: null });
+      const [done] = await store.listAppeals("rejected", 10);
+      expect(done).toMatchObject({ contact: null, decisionNote: "reports look genuine" });
+      // Decided, so the owner can ask again.
+      expect((await store.createAppeal(appeal())).ok).toBe(true);
+    });
+
+    it("'Delete my data' removes the appellant's appeals", async () => {
+      await store.createReport(report());
+      await store.createAppeal(appeal());
+      expect(await store.deleteUserData("owner")).toEqual({ reports: 0, checks: 0, appeals: 1 });
+      expect(await store.listAppeals("open", 10)).toEqual([]);
+    });
+
+    it("an unknown appeal id resolves to null", async () => {
+      expect(await store.resolveAppeal(crypto.randomUUID(), "upheld", null)).toBeNull();
+    });
   });
 
   it("answers ping", async () => {
@@ -200,7 +299,11 @@ describe("migrate", () => {
   it("applies each migration once", async () => {
     const db = new PGlite();
     const sql: Sql = { query: (t, p) => db.query(t, p) as never, exec: (t) => db.exec(t) };
-    expect(await migrate(sql)).toEqual(["001_init.sql", "002_android_channel.sql"]);
+    expect(await migrate(sql)).toEqual([
+      "001_init.sql",
+      "002_android_channel.sql",
+      "003_appeals.sql",
+    ]);
     expect(await migrate(sql)).toEqual([]);
   });
 

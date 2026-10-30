@@ -10,6 +10,8 @@ import { createWhatsAppSender, registerWhatsAppWebhook } from "./bots/whatsapp.j
 import { createMemoryCache, createRedisCache } from "./cache.js";
 import { loadConfig } from "./config.js";
 import { logSerializers } from "./security.js";
+import { createAiCheck } from "./services/ai-check.js";
+import { createDomainAge } from "./services/domain-age.js";
 import { createSafeBrowsing } from "./services/safe-browsing.js";
 
 // Local dev: read the repo-root .env. In production the host sets env vars.
@@ -25,6 +27,14 @@ if (sql) await migrate(sql, (msg) => console.log(`[migrate] ${msg}`));
 const store = sql ? createPgStore(sql) : createMemoryStore();
 const cache = config.REDIS_URL ? createRedisCache(config.REDIS_URL) : createMemoryCache();
 
+const domainAge =
+  config.DOMAIN_AGE_LOOKUP === "on"
+    ? createDomainAge({
+        cache,
+        onError: (err) => app.log.warn({ err }, "website registration lookup failed"),
+      })
+    : undefined;
+
 const app = buildApp(
   {
     store,
@@ -32,13 +42,28 @@ const app = buildApp(
     salt: config.HASH_SALT,
     corsOrigins: config.CORS_ORIGINS.split(",").map((s) => s.trim()),
     trustProxyHops: config.TRUST_PROXY_HOPS,
+    adminToken: config.ADMIN_TOKEN,
     safeBrowsing: createSafeBrowsing({
       apiKey: config.SAFE_BROWSING_API_KEY,
       onError: (err) => app.log.warn({ err }, "Safe Browsing check failed"),
     }),
+    domainAge,
+    aiCheck:
+      config.AI_CHECK === "on"
+        ? createAiCheck({
+            cache,
+            apiKey: config.ANTHROPIC_API_KEY,
+            model: config.AI_CHECK_MODEL,
+            waitMs: config.AI_CHECK_WAIT_MS,
+            log: { info: (o, m) => app.log.info(o, m), warn: (o, m) => app.log.warn(o, m) },
+          })
+        : undefined,
   },
   { logger: { level: config.LOG_LEVEL, serializers: logSerializers } },
 );
+
+// Fetched now so the first check doesn't wait for it. Its errors log through `app`.
+void domainAge?.warmUp?.();
 
 // Bots: each switches on when its keys are in the environment.
 const conversation = createConversation({
@@ -106,6 +131,10 @@ if (!sql) app.log.warn("DATABASE_URL not set: using an in-memory store (data is 
 if (!config.REDIS_URL) app.log.warn("REDIS_URL not set: using an in-memory cache");
 if (sql && !config.DATABASE_CA_CERT && config.NODE_ENV === "production")
   app.log.warn("DATABASE_CA_CERT not set: database TLS is encrypted but the server isn't verified");
+if (config.AI_CHECK === "on")
+  app.log.info(
+    `AI second opinion on: ${config.AI_CHECK_MODEL}, waits ${config.AI_CHECK_WAIT_MS} ms`,
+  );
 if (!config.SAFE_BROWSING_API_KEY)
   app.log.warn("SAFE_BROWSING_API_KEY not set: link check uses seed lists only");
 

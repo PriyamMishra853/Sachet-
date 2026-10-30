@@ -1,11 +1,13 @@
 package com.unfilteredengineers.sachet
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.content.IntentCompat
 import com.unfilteredengineers.sachet.data.combineShared
 import com.unfilteredengineers.sachet.ui.SachetApp
 import com.unfilteredengineers.sachet.ui.SachetViewModel
@@ -30,14 +32,22 @@ class MainActivity : ComponentActivity() {
         handleShare(intent)
     }
 
-    // Another app's Share menu sends plain text here. Treat it as untrusted
-    // input: it is only ever shown as text and sent to the API to be checked.
+    // Another app's Share menu sends plain text or a picture here. Treat both
+    // as untrusted input: text is only ever shown and sent to the API to be
+    // checked; a picture is only read for its text, on the phone.
     private fun handleShare(intent: Intent?) {
-        if (intent?.action != Intent.ACTION_SEND || intent.type != "text/plain") return
-        val text = combineShared(
-            subject = intent.getStringExtra(Intent.EXTRA_SUBJECT),
-            text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString(),
-        )
-        vm.checkShared(text)
+        if (intent?.action != Intent.ACTION_SEND) return
+        val type = intent.type ?: return
+        when {
+            type == "text/plain" -> vm.checkShared(
+                combineShared(
+                    subject = intent.getStringExtra(Intent.EXTRA_SUBJECT),
+                    text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString(),
+                ),
+            )
+            type.startsWith("image/") ->
+                IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                    ?.let(vm::checkScreenshot)
+        }
     }
 }

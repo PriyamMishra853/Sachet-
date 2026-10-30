@@ -29,6 +29,7 @@ git push
    | `TELEGRAM_BOT_TOKEN`      | from @BotFather                                                      |
    | `TELEGRAM_WEBHOOK_SECRET` | a new random string: run `openssl rand -hex 24` and paste the output |
    | `CORS_ORIGINS`            | leave for now; set in step 3                                         |
+   | `ADMIN_TOKEN`             | a new random string: `openssl rand -hex 32` (for `/admin` reviews)   |
 
    Add `DATABASE_URL` and `REDIS_URL` **only once they work locally** (`pnpm dev:api` shows
    `"db":true,"cache":true` at `/health`). A wrong `DATABASE_URL` stops the API from starting.
@@ -91,19 +92,30 @@ Limits: the test number can only reply within 24 hours of the user's last messag
 "Did you pay?" follow-up needs that window too. The access token expires on 26 Dec 2026; make a
 new system-user token before then.
 
-## 6. Android app
+## 6. Optional: AI second opinion
+
+Only after `pnpm eval:ai --yes` shows that rules + AI catch more scams without more false alarms:
+Railway → Variables → `AI_CHECK` = `on`, `ANTHROPIC_API_KEY` = your key from
+platform.claude.com (and `AI_CHECK_MODEL` if you choose a model other than `claude-opus-5-5`).
+The startup log then shows `AI second opinion on`. Each new message costs one API call; repeats
+of the same message are cached for 7 days. Set a monthly spend limit in the Claude Console.
+
+## 7. Android app
 
 Debug APKs come from every CI run (Actions → the run → Artifacts → `sachet-debug-apk`). For a
 release build signed with your own key, follow "Release build" in
 [frontend/android/README.md](../frontend/android/README.md).
 
-## 7. Test on your phone
+## 8. Test on your phone
 
 1. Telegram → @SachetkroBot → `/start`, then forward a scam message.
 2. Android Chrome → open `https://<project>.vercel.app` → tap **📲 Install app**
    (or ⋮ menu → **Install app**).
 3. WhatsApp → long-press a message → **Share** → **Sachet**. The result opens and is checked
    straight away.
+
+4. Owner review: check a number you reported, tap **Ask for a review**, send it; then open
+   `https://<project>.vercel.app/admin`, paste `ADMIN_TOKEN` and uphold or reject it.
 
 If Sachet doesn't appear in the Share menu: it must be installed (not just bookmarked), and
 Android sometimes needs a minute after install. iPhone supports install ("Add to Home Screen")

@@ -27,8 +27,8 @@ export const BOT_CHECKS_PER_MINUTE = 20;
 
 const T = {
   welcome: {
-    en: "Namaste! I'm Sachet. Forward me any suspicious message, phone number, UPI ID or link, and I'll tell you if it looks like a scam.\n\nForwarding an SMS? Put the sender on the first line, like:\nFrom: VM-HDFCBK-S\n\nCommands: /report to report a scam, /lang to switch language, /delete to delete your data.",
-    hi: "नमस्ते! मैं Sachet हूं। कोई भी शक वाला मैसेज, फोन नंबर, UPI ID या लिंक मुझे भेजें, मैं बताऊंगा कि यह धोखाधड़ी जैसा लगता है या नहीं।\n\nSMS फॉरवर्ड कर रहे हैं? पहली लाइन में भेजने वाला लिखें, जैसे:\nभेजने वाला: VM-HDFCBK-S\n\nकमांड: /report शिकायत के लिए, /lang भाषा बदलने के लिए, /delete अपना डेटा मिटाने के लिए।",
+    en: "Namaste! I'm Sachet. Forward me any suspicious message, phone number, UPI ID or link, and I'll tell you if it looks like a scam.\n\nForwarding an SMS? Put the sender on the first line, like:\nFrom: VM-HDFCBK-S\n\nCommands: /report to report a scam, /lang to switch language, /privacy to see what we store, /delete to delete your data.",
+    hi: "नमस्ते! मैं Sachet हूं। कोई भी शक वाला मैसेज, फोन नंबर, UPI ID या लिंक मुझे भेजें, मैं बताऊंगा कि यह धोखाधड़ी जैसा लगता है या नहीं।\n\nSMS फॉरवर्ड कर रहे हैं? पहली लाइन में भेजने वाला लिखें, जैसे:\nभेजने वाला: VM-HDFCBK-S\n\nकमांड: /report शिकायत के लिए, /lang भाषा बदलने के लिए, /privacy यह जानने के लिए कि हम क्या सेव करते हैं, /delete अपना डेटा मिटाने के लिए।",
   },
   chooseLang: { en: "Choose your language:", hi: "अपनी भाषा चुनें:" },
   langSet: { en: "Language set to English.", hi: "भाषा हिंदी कर दी गई है।" },
@@ -66,6 +66,33 @@ const T = {
   slowDown: {
     en: "You're sending messages very fast. Please wait a minute and try again.",
     hi: "आप बहुत तेज़ी से मैसेज भेज रहे हैं। कृपया एक मिनट रुककर फिर कोशिश करें।",
+  },
+  // Short form of the website's privacy notice (DPDP Act). Keep the three in sync.
+  privacy: {
+    en: [
+      "Privacy, in short:",
+      "• We save the phone numbers, UPI IDs and websites people check or report, so we can warn others.",
+      "• Reported messages are saved after removing names, OTPs, emails, Aadhaar, PAN, card and account numbers we can find.",
+      '• We never save your phone number or chat ID, only a scrambled code (a salted hash) so your reports count once. If a check looks risky, your chat ID is kept for up to 48 hours to ask "Did you pay?", then deleted.',
+      "• Links you check may be sent to Google Safe Browsing to see if Google knows they are dangerous.",
+      "• Website names may be looked up in public domain registration records (RDAP) to see how new the website is.",
+      "• If the AI check is on, message text (with personal details removed) may be sent to Anthropic's Claude AI for a second opinion.",
+      "• We never sell data and never call anyone a criminal: we only say what was reported.",
+      "",
+      "Send /delete to delete your reports and check history.",
+    ].join("\n"),
+    hi: [
+      "गोपनीयता, संक्षेप में:",
+      "• लोग जिन फोन नंबर, UPI ID और वेबसाइट की जांच या शिकायत करते हैं, उन्हें हम सेव करते हैं, ताकि दूसरों को सावधान कर सकें।",
+      "• शिकायत वाले मैसेज में मिलने वाले नाम, OTP, ईमेल, आधार, पैन, कार्ड और खाता नंबर हटाकर ही उन्हें सेव किया जाता है।",
+      '• हम आपका फोन नंबर या चैट ID कभी सेव नहीं करते, सिर्फ एक बदला हुआ कोड (salted hash) रखते हैं ताकि आपकी शिकायत एक ही बार गिनी जाए। अगर जांच जोखिम भरी लगे, तो "क्या आपने पैसे भेजे?" पूछने के लिए आपकी चैट ID अधिकतम 48 घंटे रखी जाती है, फिर मिटा दी जाती है।',
+      "• आपके जांचे गए लिंक Google Safe Browsing को भेजे जा सकते हैं, यह देखने के लिए कि Google उन्हें खतरनाक मानता है या नहीं।",
+      "• वेबसाइट के नाम सार्वजनिक डोमेन रजिस्ट्रेशन रिकॉर्ड (RDAP) में देखे जा सकते हैं, यह जानने के लिए कि वेबसाइट कितनी नई है।",
+      "• अगर AI जांच चालू है, तो मैसेज का टेक्स्ट (निजी जानकारी हटाकर) दूसरी राय के लिए Anthropic के Claude AI को भेजा जा सकता है।",
+      "• हम डेटा कभी नहीं बेचते और किसी को अपराधी नहीं कहते: हम सिर्फ बताते हैं कि क्या शिकायत हुई।",
+      "",
+      "अपनी शिकायतें और जांच का इतिहास मिटाने के लिए /delete भेजें।",
+    ].join("\n"),
   },
   rateLimited: {
     en: "You've sent many reports this hour. Please try again later.",
@@ -127,6 +154,9 @@ export function createConversation(deps: {
         const chosen: Lang = text.toLowerCase() === "english" ? "en" : "hi";
         await cache.set(`lang:${hash}`, chosen, LANG_TTL);
         return [{ text: T.langSet[chosen] }];
+      }
+      if (["/privacy", "privacy", "गोपनीयता"].includes(command) && rest.length === 0) {
+        return [{ text: T.privacy[lang] }];
       }
       if (command === "/delete") {
         await store.deleteUserData(hash);

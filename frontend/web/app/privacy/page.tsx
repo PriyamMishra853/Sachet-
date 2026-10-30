@@ -22,6 +22,10 @@ const SECTIONS = [
         en: "For each check: the result (for example 'high risk'), the scam type, and the amount asked for, so we can count money protected.",
         hi: "हर जांच के लिए: नतीजा (जैसे 'उच्च जोखिम'), धोखाधड़ी का प्रकार, और मांगी गई रकम, ताकि बचाए गए पैसों की गिनती हो सके।",
       },
+      {
+        en: "If you ask for a review of your own number, UPI ID or website: your reason, and the contact you give until the review is decided.",
+        hi: "अगर आप अपने नंबर, UPI ID या वेबसाइट की जांच का अनुरोध करते हैं: आपकी बताई वजह, और फैसला होने तक आपका दिया संपर्क।",
+      },
     ],
   },
   {
@@ -47,6 +51,14 @@ const SECTIONS = [
       {
         en: "Links you check may be sent to Google Safe Browsing to see if Google knows they are dangerous.",
         hi: "आपके जांचे गए लिंक Google Safe Browsing को भेजे जा सकते हैं, यह देखने के लिए कि Google उन्हें खतरनाक मानता है या नहीं।",
+      },
+      {
+        en: "Website names you check may be looked up in the public domain registration records (RDAP) to see how new the website is.",
+        hi: "आपके जांचे गए वेबसाइट नाम सार्वजनिक डोमेन रजिस्ट्रेशन रिकॉर्ड (RDAP) में देखे जा सकते हैं, यह जानने के लिए कि वेबसाइट कितनी नई है।",
+      },
+      {
+        en: "If the AI check is switched on: message text you check, after removing the personal details we can find, may be sent to Anthropic's Claude AI for a second opinion. Sachet keeps only its yes/no answer, for up to 7 days.",
+        hi: "अगर AI जांच चालू है: आपके जांचे गए मैसेज का टेक्स्ट, उसमें मिलने वाली निजी जानकारी हटाने के बाद, दूसरी राय के लिए Anthropic के Claude AI को भेजा जा सकता है। Sachet सिर्फ उसका हां/ना जवाब, अधिकतम 7 दिन रखता है।",
       },
     ],
   },

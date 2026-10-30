@@ -5,12 +5,14 @@ import { z } from "zod";
 import type { Cache } from "../cache.js";
 import { hashUser } from "../hash.js";
 import { networkOf } from "../security.js";
+import type { Appeals } from "../services/appeals.js";
 import type { Checker, Ctx } from "../services/checker.js";
 
 // Per-IP limits, on top of the per-person report limit in the checker.
 const CHECKS_PER_MINUTE = 60;
 const REPORTS_PER_IP_HOUR = 30;
 const OTHER_WRITES_PER_MINUTE = 20;
+const APPEALS_PER_NETWORK_DAY = 5;
 
 // The web app makes one with crypto.randomUUID(). Anything short or odd is
 // ignored, so "x" or "" can't become an identity shared by many people.
@@ -40,6 +42,17 @@ const reportBody = z
     message: "Send identifiers or text",
   });
 const paidBody = z.object({ paid: z.enum(["yes", "no"]) });
+const appealBody = z.object({
+  type: z.enum(["phone", "upi", "url"]),
+  value: z.string().trim().min(1).max(500),
+  reason: z
+    .string()
+    .trim()
+    .min(20, "Tell us in a sentence or two why the reports are wrong")
+    .max(1000),
+  // An email or phone number the owner chooses to give, so a reviewer can ask questions.
+  contact: z.string().trim().max(200).optional(),
+});
 // Clients make one up (a UUID) per report; retries reuse it.
 const idempotencyKey = z.string().min(8).max(200);
 
@@ -54,16 +67,16 @@ function toJson(v: Verdict) {
   };
 }
 
-function badRequest(reply: FastifyReply, error: z.ZodError | string) {
+export function badRequest(reply: FastifyReply, error: z.ZodError | string) {
   const reason = typeof error === "string" ? error : error.issues.map((i) => i.message).join("; ");
   return reply.code(400).send({ error: "bad_request", reason });
 }
 
 export function v1Routes(
   app: FastifyInstance,
-  deps: { checker: Checker; cache: Cache; store: Store; salt: string },
+  deps: { checker: Checker; appeals: Appeals; cache: Cache; store: Store; salt: string },
 ) {
-  const { checker, cache, store, salt } = deps;
+  const { checker, appeals, cache, store, salt } = deps;
 
   const clientIdOf = (req: FastifyRequest): string | null => {
     const v = req.headers["x-client-id"];
@@ -102,6 +115,12 @@ export function v1Routes(
     OTHER_WRITES_PER_MINUTE,
     60,
     "Too many requests. Wait a minute.",
+  );
+  const limitAppeals = limit(
+    "appeal",
+    APPEALS_PER_NETWORK_DAY,
+    24 * 3600,
+    "Too many review requests from this network today.",
   );
 
   app.get("/v1/check", { preHandler: limitChecks }, async (req, reply) => {
@@ -171,6 +190,26 @@ export function v1Routes(
       return reply.code(204).send();
     },
   );
+
+  // The owner of a flagged number, UPI ID or website asks for a review. It
+  // never lowers the band by itself: an operator decides (routes/admin.ts).
+  app.post("/v1/appeals", { preHandler: [limitWrites, limitAppeals] }, async (req, reply) => {
+    const b = appealBody.safeParse(req.body);
+    if (!b.success) return badRequest(reply, b.error);
+    const r = await appeals.submit(b.data, webCtx(req).userHash);
+    if (r.ok) return reply.code(202).send({ appealId: r.appealId });
+    if (r.error === "invalid_identifier") return badRequest(reply, r.reason);
+    if (r.error === "not_listed") {
+      return reply.code(404).send({
+        error: "not_listed",
+        reason: "Sachet has no reports about this, so there is nothing to review.",
+      });
+    }
+    return reply.code(409).send({
+      error: "already_open",
+      reason: "A review for this is already open. We'll decide it soon.",
+    });
+  });
 
   // Shown on every home page visit, so counted at most once a minute: a flood
   // of visits can't turn into a flood of database counts.

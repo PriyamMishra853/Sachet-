@@ -5,6 +5,7 @@ import {
   formatVerdictCard,
   identifierBand,
   redact,
+  registrationLookupDomain,
   type IdentifierLookup,
 } from "../src/index.js";
 
@@ -34,6 +35,102 @@ describe("identifierBand", () => {
 
   it("is high when Safe Browsing lists it", () => {
     expect(identifierBand(lookup({ safeBrowsingHit: true }))).toBe("high");
+  });
+});
+
+describe("newly registered websites", () => {
+  const site = (domainAgeDays: number | null) =>
+    lookup({ kind: "domain", value: "sbi-rewards.xyz", domainAgeDays });
+
+  it.each([
+    [0, "medium"],
+    [29, "medium"],
+    [30, "unknown"],
+    [4000, "unknown"],
+    [null, "unknown"],
+  ] as const)("%s days old -> %s", (age, band) => {
+    expect(identifierBand(site(age))).toBe(band);
+  });
+
+  it("says how new it is, in both languages", () => {
+    const v = buildVerdict({ lookups: [site(3)] });
+    expect(v.reasons[0]).toEqual({
+      en: "This website (sbi-rewards.xyz) was registered 3 days ago. Scam websites are usually new.",
+      hi: "यह वेबसाइट (sbi-rewards.xyz) 3 दिन पहले ही बनी है। धोखाधड़ी वाली वेबसाइटें अक्सर नई होती हैं।",
+    });
+    expect(buildVerdict({ lookups: [site(0)] }).reasons[0]!.en).toContain("registered today");
+  });
+
+  it("never lowers a high band", () => {
+    expect(identifierBand({ ...site(4000), reportCount: 3 })).toBe("high");
+  });
+
+  it.each([
+    ["sbi-kyc-update.xyz", "sbi-kyc-update.xyz"],
+    ["mail.example.co.in", "example.co.in"],
+    ["bit.ly", null],
+    ["103.21.45.67", null],
+    ["google.com", null],
+    ["scam-page.vercel.app", null],
+    ["onlinesbi.sbi", null],
+    ["incometax.gov.in", null],
+  ] as const)("looks up %s as %s", (domain, expected) => {
+    expect(registrationLookupDomain(domain)).toBe(expected);
+  });
+});
+
+describe("AI second opinion", () => {
+  const plain = analyzeText("Hello, your order is ready. Please collect it from the counter.");
+
+  it("raises a quiet message to medium with the AI's scam type", () => {
+    const v = buildVerdict({
+      text: plain,
+      ai: { scam: true, scamType: "parcel", confidence: "high" },
+    });
+    expect(v.band).toBe("medium");
+    expect(v.scamType).toBe("parcel");
+    expect(v.reasons.at(-1)).toEqual({
+      en: "An AI check also reads this as a likely courier / customs parcel scam.",
+      hi: "AI जांच भी इसे संभावित कूरियर / कस्टम पार्सल धोखाधड़ी मानती है।",
+    });
+  });
+
+  it("is ignored when unsure, and never lowers or clears a verdict", () => {
+    expect(
+      buildVerdict({ text: plain, ai: { scam: true, scamType: null, confidence: "low" } }).band,
+    ).toBe("unknown");
+    const scam = analyzeText("Your parcel is held by customs. Pay ₹2,999 to customs.clear@ybl now");
+    const v = buildVerdict({
+      text: scam,
+      ai: { scam: false, scamType: null, confidence: "high" },
+    });
+    expect(v.band).toBe("high");
+    expect(v.reasons.map((r) => r.en).join(" ")).not.toMatch(/AI check/);
+  });
+
+  it("can't make anything high risk on its own", () => {
+    const v = buildVerdict({
+      text: plain,
+      ai: { scam: true, scamType: "digital_arrest", confidence: "high" },
+    });
+    expect(v.band).toBe("medium");
+  });
+});
+
+describe("owner reviews", () => {
+  it("says a review is pending but keeps the band", () => {
+    const v = buildVerdict({ lookups: [lookup({ reportCount: 3, review: "open" })] });
+    expect(v.band).toBe("high");
+    expect(v.reasons.map((r) => r.en)).toContain(
+      "Its owner says these reports are wrong. Sachet is reviewing them.",
+    );
+  });
+
+  it("explains a cleared identifier and still never says safe", () => {
+    const v = buildVerdict({ lookups: [lookup({ review: "cleared" })] });
+    expect(v.band).toBe("unknown");
+    expect(v.reasons[0]!.en).toMatch(/set aside after a review/);
+    expect(v.reasons[0]!.hi).toBeTruthy();
   });
 });
 

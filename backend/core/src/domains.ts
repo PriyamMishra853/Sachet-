@@ -1,3 +1,5 @@
+import { parse } from "tldts";
+
 // Domain lists used by the rules and by the seed-list import.
 
 // Link shorteners hide where a link really goes. Not a scam by themselves,
@@ -159,3 +161,23 @@ export const PLATFORM_DOMAINS = new Set([
   "discordapp.com",
   "mediafire.com",
 ]);
+
+// A website registered in the last 30 days is a strong scam sign: phishing
+// sites are bought, used for a week or two, and dropped. Banks' sites are years old.
+export const NEW_DOMAIN_DAYS = 30;
+
+/**
+ * The name to look up in the public registration records (RDAP), or null
+ * when its age says nothing about the link: an IP address, a shortener, a
+ * big platform, a well-known brand, or a free host where every sub-domain
+ * ("scam.vercel.app") has a different owner from the registered name.
+ */
+export function registrationLookupDomain(domain: string): string | null {
+  const info = parse(domain, { allowPrivateDomains: true });
+  if (info.isIp || info.isPrivate || !info.isIcann || !info.domain) return null;
+  if (isShortener(domain) || PLATFORM_DOMAINS.has(domain) || OFFICIAL_DOMAINS.has(domain)) {
+    return null;
+  }
+  if (domain.endsWith(".gov.in") || domain.endsWith(".nic.in")) return null;
+  return info.domain;
+}

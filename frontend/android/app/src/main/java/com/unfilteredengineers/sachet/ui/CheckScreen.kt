@@ -3,6 +3,9 @@ package com.unfilteredengineers.sachet.ui
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -66,6 +69,10 @@ fun CheckScreen(state: UiState, vm: SachetViewModel, padding: PaddingValues) {
     val lang = state.lang
     val c = state.check
     val current = TABS.first { it.tab == c.tab }
+    // Android's photo picker: no permission to read the gallery is needed.
+    val pickScreenshot = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let(vm::checkScreenshot)
+    }
 
     Page(padding) {
         Text(T.checkTitle.of(lang), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -114,6 +121,21 @@ fun CheckScreen(state: UiState, vm: SachetViewModel, padding: PaddingValues) {
                 ),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
+            OutlinedButton(
+                onClick = {
+                    pickScreenshot.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                enabled = !c.loading,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Text(T.screenshotButton.of(lang))
+            }
+            Text(
+                T.screenshotNote.of(lang),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
 
         Button(
@@ -124,7 +146,7 @@ fun CheckScreen(state: UiState, vm: SachetViewModel, padding: PaddingValues) {
             if (c.loading) {
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
-                Text(T.checking.of(lang))
+                Text((if (c.reading) T.readingScreenshot else T.checking).of(lang))
             } else {
                 Text(T.checkButton.of(lang))
             }

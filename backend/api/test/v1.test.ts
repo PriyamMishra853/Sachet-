@@ -272,7 +272,7 @@ describe("DELETE /v1/me", () => {
       url: "/v1/me",
       headers: { "x-client-id": cid("me") },
     });
-    expect(res.json()).toEqual({ reports: 1, checks: 0 });
+    expect(res.json()).toEqual({ reports: 1, checks: 0, appeals: 0 });
     expect((await store.stats()).reports).toBe(1);
   });
 
@@ -307,7 +307,7 @@ describe("channel", () => {
       url: "/v1/me",
       headers: { "x-client-id": cid("phone"), "x-sachet-client": "android" },
     });
-    expect(res.json()).toEqual({ reports: 0, checks: 2 });
+    expect(res.json()).toEqual({ reports: 0, checks: 2, appeals: 0 });
   });
 });
 

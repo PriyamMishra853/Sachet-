@@ -1,6 +1,6 @@
-import type { RiskBand, ScamType } from "@sachet/core";
+import type { Channel, RiskBand, ScamType } from "@sachet/core";
 import type { Sql } from "./sql.js";
-import type { IdentifierRef, Store, StoredIdentifier } from "./store.js";
+import type { AppealRecord, IdentifierRef, ReviewState, Store, StoredIdentifier } from "./store.js";
 
 type IdentifierRow = {
   kind: StoredIdentifier["kind"];
@@ -9,19 +9,46 @@ type IdentifierRow = {
   risk_band: RiskBand;
   source: StoredIdentifier["source"];
   scam_type: ScamType | null;
+  review: ReviewState;
 };
+
+type AppealRow = {
+  id: string;
+  reason: string;
+  contact: string | null;
+  status: AppealRecord["status"];
+  decision_note: string | null;
+  created_at: Date | string;
+  resolved_at: Date | string | null;
+  kind: StoredIdentifier["kind"];
+  value: string;
+  report_count: number;
+  risk_band: RiskBand;
+  source: StoredIdentifier["source"];
+  recent: {
+    channel: Channel;
+    scam_type: ScamType | null;
+    text_redacted: string | null;
+    created_at: string;
+  }[];
+};
+
+// Reports that still count for identifier i: all of them, or only those
+// made after an upheld appeal cleared it.
+const COUNTS = "(i.cleared_at IS NULL OR r.created_at > i.cleared_at)";
 
 // Recounts DIFFERENT reporters for the given identifiers. Run after every
 // change to reports, so one person reporting the same number 5 times still
-// counts as 1, and deleted reports stop counting.
+// counts as 1, and deleted (or cleared) reports stop counting.
 const RECOUNT = `
   UPDATE identifiers i
-     SET report_count = COALESCE(sub.n, 0), last_seen = now()
-    FROM (SELECT x.id, (SELECT count(DISTINCT r.reporter_hash)::int
-                          FROM report_items ri JOIN reports r ON r.id = ri.report_id
-                         WHERE ri.identifier_id = x.id) AS n
-            FROM unnest($1::bigint[]) AS x(id)) sub
-   WHERE i.id = sub.id`;
+     SET report_count = (SELECT count(DISTINCT r.reporter_hash)::int
+                           FROM report_items ri JOIN reports r ON r.id = ri.report_id
+                          WHERE ri.identifier_id = i.id AND ${COUNTS}),
+         last_seen = now()
+   WHERE i.id = ANY($1::bigint[])`;
+
+const iso = (d: Date | string) => new Date(d).toISOString();
 
 export function createPgStore(sql: Sql): Store {
   const splitRefs = (refs: IdentifierRef[]) => [refs.map((r) => r.kind), refs.map((r) => r.value)];
@@ -33,7 +60,10 @@ export function createPgStore(sql: Sql): Store {
         `SELECT i.kind, i.value_norm AS value, i.report_count, i.risk_band, i.source,
                 (SELECT mode() WITHIN GROUP (ORDER BY r.scam_type)
                    FROM report_items ri JOIN reports r ON r.id = ri.report_id
-                  WHERE ri.identifier_id = i.id AND r.scam_type IS NOT NULL) AS scam_type
+                  WHERE ri.identifier_id = i.id AND r.scam_type IS NOT NULL AND ${COUNTS}) AS scam_type,
+                CASE WHEN EXISTS (SELECT 1 FROM appeals a
+                                   WHERE a.identifier_id = i.id AND a.status = 'open') THEN 'open'
+                     WHEN i.cleared_at IS NOT NULL THEN 'cleared' END AS review
            FROM identifiers i
            JOIN unnest($1::text[], $2::text[]) AS q(kind, value)
              ON i.kind = q.kind AND i.value_norm = q.value`,
@@ -46,6 +76,7 @@ export function createPgStore(sql: Sql): Store {
         riskBand: r.risk_band,
         source: r.source,
         scamType: r.scam_type,
+        review: r.review,
       }));
     },
 
@@ -165,9 +196,104 @@ export function createPgStore(sql: Sql): Store {
         "DELETE FROM checks WHERE user_hash = $1 RETURNING id",
         [userHash],
       );
+      const appeals = await sql.query<{ id: string }>(
+        "DELETE FROM appeals WHERE appellant_hash = $1 RETURNING id",
+        [userHash],
+      );
       const ids = affected.rows.map((r) => r.identifier_id);
       if (ids.length) await sql.query(RECOUNT, [ids]);
-      return { reports: reports.rows.length, checks: checks.rows.length };
+      return {
+        reports: reports.rows.length,
+        checks: checks.rows.length,
+        appeals: appeals.rows.length,
+      };
+    },
+
+    async createAppeal(a) {
+      // Only something Sachet warns about can be appealed. The partial unique
+      // index allows one open appeal per identifier; a second does nothing.
+      const { rows } = await sql.query<{ id: string }>(
+        `WITH target AS (
+           SELECT id FROM identifiers
+            WHERE kind = $1 AND value_norm = $2
+              AND (report_count > 0 OR risk_band IN ('medium', 'high'))
+         )
+         INSERT INTO appeals (identifier_id, appellant_hash, reason, contact)
+         SELECT id, $3, $4, $5 FROM target
+         ON CONFLICT (identifier_id) WHERE status = 'open' DO NOTHING
+         RETURNING id`,
+        [a.kind, a.value, a.appellantHash, a.reason, a.contact],
+      );
+      if (rows[0]) return { ok: true, appealId: rows[0].id };
+      const open = await sql.query(
+        `SELECT 1 FROM appeals ap JOIN identifiers i ON i.id = ap.identifier_id
+          WHERE i.kind = $1 AND i.value_norm = $2 AND ap.status = 'open'`,
+        [a.kind, a.value],
+      );
+      return { ok: false, error: open.rows.length ? "already_open" : "not_listed" };
+    },
+
+    async listAppeals(status, limit) {
+      const { rows } = await sql.query<AppealRow>(
+        `SELECT a.id, a.reason, a.contact, a.status, a.decision_note, a.created_at, a.resolved_at,
+                i.kind, i.value_norm AS value, i.report_count, i.risk_band, i.source,
+                (SELECT COALESCE(json_agg(x ORDER BY x.created_at DESC), '[]'::json)
+                   FROM (SELECT r.channel, r.scam_type, r.text_redacted, r.created_at
+                           FROM report_items ri JOIN reports r ON r.id = ri.report_id
+                          WHERE ri.identifier_id = i.id
+                          ORDER BY r.created_at DESC LIMIT 5) x) AS recent
+           FROM appeals a JOIN identifiers i ON i.id = a.identifier_id
+          WHERE a.status = $1
+          ORDER BY a.created_at
+          LIMIT $2`,
+        [status, limit],
+      );
+      return rows.map((r) => ({
+        id: r.id,
+        identifier: {
+          kind: r.kind,
+          value: r.value,
+          reportCount: r.report_count,
+          riskBand: r.risk_band,
+          source: r.source,
+        },
+        reason: r.reason,
+        contact: r.contact,
+        status: r.status,
+        decisionNote: r.decision_note,
+        createdAt: iso(r.created_at),
+        resolvedAt: r.resolved_at ? iso(r.resolved_at) : null,
+        recentReports: r.recent.map((x) => ({
+          channel: x.channel,
+          scamType: x.scam_type,
+          textRedacted: x.text_redacted,
+          createdAt: iso(x.created_at),
+        })),
+      }));
+    },
+
+    async resolveAppeal(id, decision, note) {
+      // The owner's contact is only needed until the decision, so it goes.
+      const { rows } = await sql.query<{ id: number; kind: IdentifierRef["kind"]; value: string }>(
+        `WITH done AS (
+           UPDATE appeals
+              SET status = $2::text, decision_note = $3, resolved_at = now(), contact = NULL
+            WHERE id = $1 AND status = 'open'
+           RETURNING identifier_id
+         ), cleared AS (
+           UPDATE identifiers i SET cleared_at = now(), risk_band = 'unknown'
+             FROM done WHERE i.id = done.identifier_id AND $2::text = 'upheld'
+           RETURNING i.id
+         )
+         SELECT i.id, i.kind, i.value_norm AS value
+           FROM identifiers i JOIN done ON i.id = done.identifier_id`,
+        [id, decision, note],
+      );
+      const row = rows[0];
+      if (!row) return null;
+      // A separate statement, so the recount sees the new cleared_at.
+      if (decision === "upheld") await sql.query(RECOUNT, [[row.id]]);
+      return { kind: row.kind, value: row.value };
     },
 
     async stats() {
