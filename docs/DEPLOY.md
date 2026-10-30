@@ -109,7 +109,7 @@ release build signed with your own key, follow "Release build" in
 ## 8. Test on your phone
 
 1. Telegram → @SachetkroBot → `/start`, then forward a scam message.
-2. Android Chrome → open `https://<project>.vercel.app` → tap **📲 Install app**
+2. Android Chrome → open `https://<project>.vercel.app` → tap **Add to home screen**
    (or ⋮ menu → **Install app**).
 3. WhatsApp → long-press a message → **Share** → **Sachet**. The result opens and is checked
    straight away.

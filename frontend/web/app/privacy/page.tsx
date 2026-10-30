@@ -32,8 +32,8 @@ const SECTIONS = [
     title: { en: "What we never store", hi: "हम क्या कभी सेव नहीं करते" },
     items: [
       {
-        en: "Your own phone number, Telegram ID or IP address. We keep only a one-way scrambled code (a salted hash) so your reports are counted once.",
-        hi: "आपका अपना फोन नंबर, Telegram ID या IP पता। हम सिर्फ एक बदला हुआ कोड (salted hash) रखते हैं ताकि आपकी शिकायत एक ही बार गिनी जाए।",
+        en: "Your own phone number, Telegram ID or internet address. We keep only a scrambled code made from it, which can't be turned back into the original, so your reports are counted once.",
+        hi: "आपका अपना फोन नंबर, Telegram ID या इंटरनेट पता। हम सिर्फ उससे बना एक बदला हुआ कोड रखते हैं, जिससे असली जानकारी वापस नहीं निकाली जा सकती, ताकि आपकी शिकायत एक ही बार गिनी जाए।",
       },
       {
         en: "Exception: if a check looks risky on Telegram or WhatsApp, your chat ID is kept for up to 48 hours only to ask 'Did you pay?' the next day, then deleted.",
@@ -53,8 +53,8 @@ const SECTIONS = [
         hi: "आपके जांचे गए लिंक Google Safe Browsing को भेजे जा सकते हैं, यह देखने के लिए कि Google उन्हें खतरनाक मानता है या नहीं।",
       },
       {
-        en: "Website names you check may be looked up in the public domain registration records (RDAP) to see how new the website is.",
-        hi: "आपके जांचे गए वेबसाइट नाम सार्वजनिक डोमेन रजिस्ट्रेशन रिकॉर्ड (RDAP) में देखे जा सकते हैं, यह जानने के लिए कि वेबसाइट कितनी नई है।",
+        en: "Website names you check may be looked up in public records of when websites were registered, to see how new the website is.",
+        hi: "आपके जांचे गए वेबसाइट नाम उन सार्वजनिक रिकॉर्ड में देखे जा सकते हैं जिनमें वेबसाइट के रजिस्टर होने की तारीख होती है, यह जानने के लिए कि वेबसाइट कितनी नई है।",
       },
       {
         en: "If the AI check is switched on: message text you check, after removing the personal details we can find, may be sent to Anthropic's Claude AI for a second opinion. Sachet keeps only its yes/no answer, for up to 7 days.",
@@ -95,8 +95,13 @@ export default function PrivacyPage() {
   }
 
   return (
-    <>
-      <h1>{lang === "en" ? "Privacy notice" : "गोपनीयता सूचना"}</h1>
+    <div className="page">
+      <h1>{lang === "en" ? "Your privacy" : "आपकी गोपनीयता"}</h1>
+      <p className="lead">
+        {lang === "en"
+          ? "What Sachet keeps, what it never keeps, and how to delete your data."
+          : "Sachet क्या रखता है, क्या कभी नहीं रखता, और अपना डेटा कैसे मिटाएं।"}
+      </p>
       {SECTIONS.map((s) => (
         <section key={s.title.en} className="card prose">
           <h2>{s.title[lang]}</h2>
@@ -107,10 +112,10 @@ export default function PrivacyPage() {
           </ul>
         </section>
       ))}
-      <button className="secondary" onClick={deleteMyData}>
+      <button className="button button-plain" onClick={deleteMyData}>
         {lang === "en" ? "Delete my data from this browser" : "इस ब्राउज़र से मेरा डेटा मिटाएं"}
       </button>
       {deleted && <p className="ok">{deleted}</p>}
-    </>
+    </div>
   );
 }

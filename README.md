@@ -104,7 +104,7 @@ once.
 
 ### Installable web app (PWA) and Android Share menu
 
-The web app can be installed from the browser ("Install app" button on Android, "Add to Home
+The web app can be installed from the browser ("Add to home screen" button on Android, "Add to Home
 Screen" on iPhone). Once installed on Android, Sachet appears in the **Share** menu: long-press a
 message in WhatsApp or SMS → Share → Sachet, and `/share` checks it straight away.
 

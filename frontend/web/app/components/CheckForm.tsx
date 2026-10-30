@@ -25,11 +25,18 @@ export function CheckForm({
   const [result, setResult] = useState<{ data: CheckResult; checked: Checked } | null>(null);
   const autoRan = useRef(false);
 
-  const tabs: { id: Tab; label: string; placeholder: string }[] = [
-    { id: "message", label: tr("tabMessage"), placeholder: tr("phMessage") },
-    { id: "phone", label: tr("tabPhone"), placeholder: tr("phPhone") },
-    { id: "upi", label: tr("tabUpi"), placeholder: tr("phUpi") },
-    { id: "url", label: tr("tabUrl"), placeholder: tr("phUrl") },
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  const tabs: { id: Tab; label: string; field: string; placeholder: string }[] = [
+    {
+      id: "message",
+      label: tr("tabMessage"),
+      field: tr("fieldMessage"),
+      placeholder: tr("phMessage"),
+    },
+    { id: "phone", label: tr("tabPhone"), field: tr("fieldPhone"), placeholder: tr("phPhone") },
+    { id: "upi", label: tr("tabUpi"), field: tr("fieldUpi"), placeholder: tr("phUpi") },
+    { id: "url", label: tr("tabUrl"), field: tr("fieldUrl"), placeholder: tr("phUrl") },
   ];
   const current = tabs.find((x) => x.id === tab)!;
 
@@ -56,6 +63,11 @@ export function CheckForm({
     }
   }
 
+  // On a phone the answer appears below the form, out of sight: bring it up.
+  useEffect(() => {
+    if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [result]);
+
   // A ref, not state: React's strict mode runs effects twice in development,
   // and we must not check the shared message twice.
   useEffect(() => {
@@ -72,8 +84,11 @@ export function CheckForm({
 
   return (
     <>
-      <form onSubmit={onSubmit} className="card">
-        <div className="tabs" role="tablist">
+      <form onSubmit={onSubmit} className="check-form">
+        <p className="form-question" id="check-question">
+          {tr("formQuestion")}
+        </p>
+        <div className="tabs" role="tablist" aria-labelledby="check-question">
           {tabs.map((x) => (
             <button
               key={x.id}
@@ -91,18 +106,33 @@ export function CheckForm({
           ))}
         </div>
 
-        {tab === "message" ? (
-          <>
+        <label className="field">
+          <span className="field-label">{current.field}</span>
+          {tab === "message" ? (
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={current.placeholder}
               rows={6}
               maxLength={4000}
-              aria-label={current.label}
             />
-            <label>
-              {tr("senderLabel")}
+          ) : (
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={current.placeholder}
+              inputMode={tab === "phone" ? "tel" : tab === "url" ? "url" : "email"}
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+          )}
+        </label>
+
+        {tab === "message" && (
+          <details className="sender-details" open={Boolean(sender)}>
+            <summary>{tr("senderToggle")}</summary>
+            <label className="field">
+              <span className="field-label">{tr("senderLabel")}</span>
               <input
                 value={sender}
                 onChange={(e) => setSender(e.target.value)}
@@ -111,21 +141,12 @@ export function CheckForm({
                 autoCapitalize="characters"
                 autoCorrect="off"
               />
+              <span className="field-help">{tr("senderHelp")}</span>
             </label>
-          </>
-        ) : (
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={current.placeholder}
-            inputMode={tab === "phone" ? "tel" : tab === "url" ? "url" : "email"}
-            autoCapitalize="off"
-            autoCorrect="off"
-            aria-label={current.label}
-          />
+          </details>
         )}
 
-        <button type="submit" className="primary" disabled={loading || !input.trim()}>
+        <button type="submit" className="button button-primary" disabled={loading || !input.trim()}>
           {loading ? tr("checking") : tr("checkButton")}
         </button>
         {error && (
@@ -136,11 +157,13 @@ export function CheckForm({
       </form>
 
       {result && (
-        <ResultCard
-          key={result.data.checkId ?? input}
-          result={result.data}
-          checked={result.checked}
-        />
+        <div ref={resultRef} className="result-anchor">
+          <ResultCard
+            key={result.data.checkId ?? input}
+            result={result.data}
+            checked={result.checked}
+          />
+        </div>
       )}
     </>
   );

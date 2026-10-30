@@ -53,7 +53,7 @@ export default function AdminPage() {
   }
 
   return (
-    <>
+    <div className="page">
       <h1>Reviews</h1>
       <form onSubmit={onSubmit} className="card">
         <label>
@@ -93,7 +93,7 @@ export default function AdminPage() {
           </div>
           {appeals.length === 0 && <p className="muted">No {status} appeals.</p>}
           {appeals.map((a) => (
-            <section key={a.id} className={`result band-${a.identifier.riskBand}`}>
+            <section key={a.id} className="card">
               <h2>
                 <code>{a.identifier.value}</code>
               </h2>
@@ -163,6 +163,6 @@ export default function AdminPage() {
           ))}
         </>
       )}
-    </>
+    </div>
   );
 }

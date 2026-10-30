@@ -135,14 +135,14 @@ export function buildVerdict(input: {
 
     if (l.safeBrowsingHit) {
       reasons.push({
-        en: `${who.en} is flagged as dangerous by Google Safe Browsing.`,
-        hi: `${who.hi} Google Safe Browsing में खतरनाक बताई गई है।`,
+        en: `${who.en} is on Google's list of dangerous websites.`,
+        hi: `${who.hi} Google की खतरनाक वेबसाइटों की सूची में है।`,
       });
     }
     if (l.source === "seed" && l.storedBand === "high") {
       reasons.push({
-        en: `${who.en} is on a public phishing blocklist.`,
-        hi: `${who.hi} एक सार्वजनिक फ़िशिंग ब्लॉकलिस्ट में है।`,
+        en: `${who.en} is on a public list of fake and fraud websites.`,
+        hi: `${who.hi} नकली और धोखाधड़ी वाली वेबसाइटों की एक सार्वजनिक सूची में है।`,
       });
     }
     if (l.reportCount > 0) {

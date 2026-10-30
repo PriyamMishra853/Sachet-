@@ -48,7 +48,7 @@ export default function AppealPage() {
   }
 
   return (
-    <>
+    <div className="page">
       <h1>{tr("appealTitle")}</h1>
       <p className="lead">{tr("appealIntro")}</p>
 
@@ -109,6 +109,6 @@ export default function AppealPage() {
           )}
         </form>
       )}
-    </>
+    </div>
   );
 }

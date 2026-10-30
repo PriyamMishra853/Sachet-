@@ -29,12 +29,12 @@ function SharedCheck() {
 export default function SharePage() {
   const { tr } = useLang();
   return (
-    <>
+    <div className="page">
       <h1>{tr("checkTitle")}</h1>
       {/* useSearchParams needs a Suspense boundary so the page can be prerendered. */}
       <Suspense>
         <SharedCheck />
       </Suspense>
-    </>
+    </div>
   );
 }

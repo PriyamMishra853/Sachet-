@@ -47,7 +47,7 @@ export default function ReportPage() {
   }
 
   return (
-    <>
+    <div className="page">
       <h1>{tr("reportTitle")}</h1>
       <p className="lead">{tr("reportIntro")}</p>
 
@@ -113,6 +113,6 @@ export default function ReportPage() {
           <p className="ok">{tr(state === "done" ? "reportThanks" : "reportDuplicate")}</p>
         )}
       </form>
-    </>
+    </div>
   );
 }

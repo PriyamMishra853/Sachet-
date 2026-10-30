@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-// App icons, drawn from code at build time: a white "!" on Sachet green.
+// App icons, drawn from code at build time: the white shield-and-alert mark
+// on Sachet navy (the same mark as the site header).
 // "maskable" fills the whole square (Android crops it to a circle or
 // squircle), so the mark stays inside the central safe zone.
 const SIZES = { "180": 180, "192": 192, "512": 512, maskable: 512 } as const;
@@ -26,25 +27,22 @@ export async function GET(_req: Request, { params }: { params: Promise<{ size: s
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: maskable ? "#0f5132" : "transparent",
+        background: "#0b3d91",
+        borderRadius: maskable ? 0 : "22%",
       }}
     >
-      <div
-        style={{
-          width: maskable ? "60%" : "100%",
-          height: maskable ? "60%" : "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0f5132",
-          borderRadius: maskable ? 0 : "22%",
-          color: "white",
-          fontSize: px * (maskable ? 0.42 : 0.62),
-          fontWeight: 800,
-        }}
+      <svg
+        width={px * (maskable ? 0.5 : 0.64)}
+        height={px * (maskable ? 0.5 : 0.64)}
+        viewBox="0 0 32 32"
       >
-        !
-      </div>
+        <path
+          d="M16 2.5 4.5 7v8.2c0 7 4.9 12.3 11.5 14.3 6.6-2 11.5-7.3 11.5-14.3V7L16 2.5Z"
+          fill="#ffffff"
+        />
+        <path d="M16 9v8" stroke="#0b3d91" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="16" cy="22" r="1.9" fill="#0b3d91" />
+      </svg>
     </div>,
     { width: px, height: px },
   );

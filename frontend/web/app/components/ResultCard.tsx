@@ -3,9 +3,16 @@
 import { useState } from "react";
 import { api, type CheckResult, type IdType } from "../../lib/api";
 import { SCAM_TYPE_NAMES } from "../../lib/i18n";
+import { AlertCircle, AlertTriangle, Flag, Info, Phone } from "./Icons";
 import { useLang } from "./LangProvider";
 
-const ICON = { high: "🔴", medium: "🟠", low: "🟡", unknown: "⚪" } as const;
+const ICON = { high: AlertTriangle, medium: AlertCircle, low: Info, unknown: Info } as const;
+const SUB = {
+  high: "bandSubHigh",
+  medium: "bandSubMedium",
+  low: "bandSubLow",
+  unknown: "bandSubUnknown",
+} as const;
 
 // What the user checked, so the Report button can report exactly that.
 export type Checked = { kind: "message"; text: string } | { kind: IdType; value: string };
@@ -58,93 +65,122 @@ export function ResultCard({ result, checked }: { result: CheckResult; checked: 
     }
   }
 
+  const BandIcon = ICON[result.band];
+
   return (
     <section className={`result band-${result.band}`} aria-live="polite">
-      <h2 className="result-band">
-        <span aria-hidden>{ICON[result.band]}</span> {result.label[lang]}
-      </h2>
-      {result.scamType && <p className="scam-type">{SCAM_TYPE_NAMES[result.scamType]?.[lang]}</p>}
-      {result.sender && (
-        <p className="sender">
-          <strong>{tr("sender")}:</strong> {result.sender.label[lang]}
-          <br />
-          <span className="muted small">{result.sender.note[lang]}</span>
-        </p>
-      )}
-      {result.reportCount > 0 && (
-        <p className="muted">
-          {tr("reportedBy")}: {result.reportCount}
-        </p>
-      )}
+      <header className="result-head">
+        <span className="result-icon">
+          <BandIcon size={28} />
+        </span>
+        <div>
+          <h2 className="result-band">{result.label[lang]}</h2>
+          <p className="result-sub">{tr(SUB[result.band])}</p>
+        </div>
+      </header>
 
-      <h3>{tr("why")}</h3>
-      <ul>
-        {result.reasons.map((r) => (
-          <li key={r.en}>{r[lang]}</li>
-        ))}
-      </ul>
-
-      {found.length > 0 && (
-        <>
-          <h3>{tr("found")}</h3>
-          <p className="chips">
-            {found.map((f) => (
-              <code key={f}>{f}</code>
-            ))}
-          </p>
-        </>
-      )}
-
-      <h3>{tr("whatToDo")}</h3>
-      <ul>
-        {result.advice.map((a) => (
-          <li key={a.en}>{a[lang]}</li>
-        ))}
-      </ul>
-
-      {askPaid && (
-        <div className="paid">
-          {paid === null ? (
-            <>
-              <p>
-                <strong>{tr("paidQuestion")}</strong>
-              </p>
-              <div className="paid-buttons">
-                <button className="secondary" onClick={() => answerPaid("yes")}>
-                  {tr("paidYes")}
-                </button>
-                <button className="secondary" onClick={() => answerPaid("no")}>
-                  {tr("paidNo")}
-                </button>
+      <div className="result-body">
+        {(result.scamType || result.reportCount > 0) && (
+          <dl className="result-facts">
+            {result.scamType && (
+              <div>
+                <dt>{tr("scamTypeLabel")}</dt>
+                <dd>{SCAM_TYPE_NAMES[result.scamType]?.[lang]}</dd>
               </div>
-            </>
-          ) : paid === "yes" ? (
-            <>
-              <p className="error">{tr("afterYes")}</p>
-              <a className="primary button-link" href="tel:1930">
-                {tr("call1930")}
-              </a>
-            </>
+            )}
+            {result.reportCount > 0 && (
+              <div>
+                <dt>{tr("reportedBy")}</dt>
+                <dd>{result.reportCount}</dd>
+              </div>
+            )}
+          </dl>
+        )}
+
+        <h3>{tr("whatToDo")}</h3>
+        <ul>
+          {result.advice.map((a) => (
+            <li key={a.en}>{a[lang]}</li>
+          ))}
+        </ul>
+
+        <h3>{tr("why")}</h3>
+        <ul>
+          {result.reasons.map((r) => (
+            <li key={r.en}>{r[lang]}</li>
+          ))}
+        </ul>
+
+        {result.sender && (
+          <>
+            <h3>{tr("sender")}</h3>
+            <p className="sender">
+              <strong>{result.sender.label[lang]}</strong>
+              <br />
+              <span className="muted small">{result.sender.note[lang]}</span>
+            </p>
+          </>
+        )}
+
+        {found.length > 0 && (
+          <>
+            <h3>{tr("found")}</h3>
+            <p className="chips">
+              {found.map((f) => (
+                <code key={f}>{f}</code>
+              ))}
+            </p>
+          </>
+        )}
+
+        {askPaid && (
+          <div className="paid">
+            {paid === null ? (
+              <>
+                <p>
+                  <strong>{tr("paidQuestion")}</strong>
+                </p>
+                <div className="button-row">
+                  <button className="button button-plain" onClick={() => answerPaid("yes")}>
+                    {tr("paidYes")}
+                  </button>
+                  <button className="button button-plain" onClick={() => answerPaid("no")}>
+                    {tr("paidNo")}
+                  </button>
+                </div>
+              </>
+            ) : paid === "yes" ? (
+              <>
+                <p className="error">{tr("afterYes")}</p>
+                <a className="button button-danger" href="tel:1930">
+                  <Phone size={18} /> {tr("call1930")}
+                </a>
+              </>
+            ) : (
+              <p className="ok">{tr("afterNo")}</p>
+            )}
+          </div>
+        )}
+
+        <div className="result-actions">
+          {reportState === "done" || reportState === "duplicate" ? (
+            <p className="ok">{tr(reportState === "done" ? "reportThanks" : "reportDuplicate")}</p>
           ) : (
-            <p className="ok">{tr("afterNo")}</p>
+            <button
+              className="button button-plain"
+              onClick={report}
+              disabled={reportState === "sending"}
+            >
+              <Flag size={18} /> {tr("reportThis")}
+            </button>
+          )}
+          {reportState === "error" && <p className="error">{tr("errorGeneric")}</p>}
+          {appealHref && (
+            <a href={appealHref} className="appeal-link small">
+              {tr("appealLink")}
+            </a>
           )}
         </div>
-      )}
-
-      <div className="actions">
-        {reportState === "done" || reportState === "duplicate" ? (
-          <p className="ok">{tr(reportState === "done" ? "reportThanks" : "reportDuplicate")}</p>
-        ) : (
-          <button className="secondary" onClick={report} disabled={reportState === "sending"}>
-            {tr("reportThis")}
-          </button>
-        )}
-        {reportState === "error" && <p className="error">{tr("errorGeneric")}</p>}
-        {appealHref && (
-          <a href={appealHref} className="small appeal-link">
-            {tr("appealLink")}
-          </a>
-        )}
       </div>
     </section>
   );

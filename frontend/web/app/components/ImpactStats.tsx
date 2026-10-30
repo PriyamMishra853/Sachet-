@@ -18,19 +18,24 @@ export function ImpactStats() {
   }, []);
 
   if (!stats || stats.checks === 0) return null;
+  const items = [
+    { value: inr.format(stats.checks), label: tr("statsChecks") },
+    { value: inr.format(stats.reports), label: tr("statsReports") },
+    ...(stats.moneyProtectedInr > 0
+      ? [{ value: `₹${inr.format(stats.moneyProtectedInr)}`, label: tr("statsProtected") }]
+      : []),
+  ];
   return (
-    <p className="stats" aria-live="polite">
-      <span>
-        <strong>{inr.format(stats.checks)}</strong> {tr("statsChecks")}
-      </span>
-      <span>
-        <strong>{inr.format(stats.reports)}</strong> {tr("statsReports")}
-      </span>
-      {stats.moneyProtectedInr > 0 && (
-        <span>
-          <strong>₹{inr.format(stats.moneyProtectedInr)}</strong> {tr("statsProtected")}
-        </span>
-      )}
-    </p>
+    <div className="stats" aria-live="polite">
+      <h2 className="section-title">{tr("statsTitle")}</h2>
+      <dl className="stats-row">
+        {items.map((i) => (
+          <div key={i.label}>
+            <dt>{i.label}</dt>
+            <dd>{i.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }

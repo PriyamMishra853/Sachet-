@@ -48,7 +48,7 @@ const HEADER = /^(?:[A-Z]{2}[-\s])?([A-Z0-9]{3,9})(?:[-\s]([PSTG]))?$/;
 const BARE_HEADER = /^[A-Z0-9]{6}$/;
 
 const REGISTERED_NOTE: Text2 = {
-  en: "Sent with a TRAI-registered sender name. Scammers find these harder to get, but it is not a guarantee: still don't pay or share an OTP because of a message.",
+  en: "Sent with a sender name registered with the telecom regulator (TRAI). Scammers find these harder to get, but it is not a guarantee: still don't pay or share an OTP because of a message.",
   hi: "TRAI में रजिस्टर्ड भेजने वाले नाम से आया है। धोखेबाज़ों को ये नाम मिलना मुश्किल होता है, पर यह गारंटी नहीं है: फिर भी किसी मैसेज के कहने पर पैसे न भेजें या OTP न बताएं।",
 };
 

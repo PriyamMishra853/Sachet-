@@ -47,7 +47,7 @@ export function InstallButton() {
       <section className="card install">
         <p>{tr("installWhy")}</p>
         <button
-          className="secondary"
+          className="button button-plain"
           onClick={async () => {
             await prompt.prompt();
             const { outcome } = await prompt.userChoice;

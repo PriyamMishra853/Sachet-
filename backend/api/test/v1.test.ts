@@ -56,7 +56,7 @@ describe("GET /v1/check", () => {
     const { app, sbCalls } = makeTestApp({ flagged: ["http://evil.example.com/login"] });
     const res = await app.inject({ url: "/v1/check?type=url&value=evil.example.com/login" });
     expect(res.json().band).toBe("high");
-    expect(res.json().reasons[0].en).toMatch(/Google Safe Browsing/);
+    expect(res.json().reasons[0].en).toMatch(/Google's list of dangerous websites/);
     expect(sbCalls).toEqual([["http://evil.example.com/login"]]);
   });
 
@@ -69,7 +69,7 @@ describe("GET /v1/check", () => {
       url: "/v1/check?type=url&value=https://login.sbi-kyc-update.xyz/a",
     });
     expect(res.json().band).toBe("high");
-    expect(res.json().reasons[0].en).toMatch(/phishing blocklist/);
+    expect(res.json().reasons[0].en).toMatch(/public list of fake and fraud websites/);
   });
 
   it("rate-limits a flood of checks from one IP", async () => {

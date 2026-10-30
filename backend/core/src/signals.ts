@@ -106,14 +106,17 @@ export const SIGNAL_TEXT: Record<Signal, Text2> = {
     en: "Uses a short link that hides the real website",
     hi: "छोटा लिंक इस्तेमाल करता है जो असली वेबसाइट छिपाता है",
   },
-  apk: { en: "Asks you to install an .apk app file", hi: ".apk ऐप फाइल इंस्टॉल करने को कहता है" },
+  apk: {
+    en: "Asks you to install an app from a file (.apk), outside the Play Store",
+    hi: "Play Store के बाहर से, एक फाइल (.apk) से ऐप इंस्टॉल करने को कहता है",
+  },
   lookalike_domain: {
     en: "Link pretends to be a well-known brand but isn't its real website",
     hi: "लिंक किसी जानी-मानी कंपनी जैसा दिखता है, पर उसकी असली वेबसाइट नहीं है",
   },
   ip_link: {
-    en: "Link goes to a bare IP address, not a website name",
-    hi: "लिंक किसी वेबसाइट नाम की जगह सीधे IP पते पर जाता है",
+    en: "The link is a string of numbers instead of a normal website name",
+    hi: "लिंक में किसी आम वेबसाइट के नाम की जगह सिर्फ अंक हैं",
   },
   official_from_mobile: {
     en: "Claims to be a bank, company or government office, but came from an ordinary phone number",
