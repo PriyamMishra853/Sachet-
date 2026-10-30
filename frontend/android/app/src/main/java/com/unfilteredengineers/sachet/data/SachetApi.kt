@@ -49,16 +49,29 @@ class SachetApi(
 
     suspend fun deleteMyData(): DeleteResponse = call(Request.Builder().url(path("v1", "me")).delete())
 
+    /** Answer to "Have you already paid?" for a check this phone made. */
+    suspend fun answerPaid(checkId: String, paid: Boolean) {
+        val body = json.encodeToString(PaidRequest(if (paid) "yes" else "no"))
+        execute(post(path("v1", "checks", checkId, "paid"), body))
+    }
+
+    suspend fun stats(): Stats = call(Request.Builder().url(path("v1", "stats")).get())
+
     private fun path(vararg segments: String): HttpUrl =
         base.newBuilder().apply { segments.forEach { addPathSegment(it) } }.build()
 
     private fun post(url: HttpUrl, body: String) =
         Request.Builder().url(url).post(body.toRequestBody(JSON_TYPE))
 
-    private suspend inline fun <reified T> call(builder: Request.Builder): T = withContext(Dispatchers.IO) {
+    private suspend inline fun <reified T> call(builder: Request.Builder): T =
+        json.decodeFromString<T>(execute(builder))
+
+    /** Sends the request and returns the body; throws ApiException on any failure. */
+    private suspend fun execute(builder: Request.Builder): String = withContext(Dispatchers.IO) {
         // A random ID kept on this phone, so the API counts this person's reports once.
         val request = builder
             .header("x-client-id", clientId())
+            .header("x-sachet-client", "android")
             .header("accept", "application/json")
             .build()
         val (code, text) = try {
@@ -70,7 +83,7 @@ class SachetApi(
             val reason = runCatching { json.decodeFromString<ErrorBody>(text).reason }.getOrNull()
             throw ApiException(code, reason ?: "HTTP $code")
         }
-        json.decodeFromString<T>(text)
+        text
     }
 
     companion object {

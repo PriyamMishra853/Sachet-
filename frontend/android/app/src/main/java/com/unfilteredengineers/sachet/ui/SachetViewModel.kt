@@ -12,6 +12,7 @@ import com.unfilteredengineers.sachet.data.MAX_MESSAGE_LENGTH
 import com.unfilteredengineers.sachet.data.Prefs
 import com.unfilteredengineers.sachet.data.ReportRequest
 import com.unfilteredengineers.sachet.data.SachetApi
+import com.unfilteredengineers.sachet.data.Stats
 import com.unfilteredengineers.sachet.data.guessType
 import com.unfilteredengineers.sachet.i18n.Lang
 import com.unfilteredengineers.sachet.i18n.T
@@ -43,6 +44,8 @@ data class CheckUi(
     val result: CheckResult? = null,
     val checked: Checked? = null,
     val reportState: SendState = SendState.IDLE,
+    /** Answer to "Have you already paid?": null until answered. */
+    val paid: Boolean? = null,
     // One key per result: double taps and retries create one report.
     val reportKey: String = UUID.randomUUID().toString(),
 )
@@ -65,6 +68,7 @@ data class UiState(
     val report: ReportUi = ReportUi(),
     val deleteMessage: Text2? = null,
     val deleting: Boolean = false,
+    val stats: Stats? = null,
 )
 
 class SachetViewModel(app: Application) : AndroidViewModel(app) {
@@ -74,7 +78,18 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
     private val _state = MutableStateFlow(UiState(lang = prefs.lang))
     val state: StateFlow<UiState> = _state.asStateFlow()
 
+    init {
+        loadStats()
+    }
+
     fun show(screen: Screen) = _state.update { it.copy(screen = screen) }
+
+    /** Impact numbers for the home screen. Left out quietly when offline. */
+    fun loadStats() {
+        viewModelScope.launch {
+            runCatching { api.stats() }.onSuccess { s -> _state.update { it.copy(stats = s) } }
+        }
+    }
 
     fun toggleLang() {
         val next = if (_state.value.lang == Lang.EN) Lang.HI else Lang.EN
@@ -126,6 +141,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
                         error = outcome.exceptionOrNull()?.let(::errorText),
                         reportState = SendState.IDLE,
                         reportKey = UUID.randomUUID().toString(),
+                        paid = null,
                     ),
                 )
             }
@@ -149,6 +165,13 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
                 .fold({ if (it.duplicate) SendState.DUPLICATE else SendState.DONE }, { SendState.ERROR })
             _state.update { it.copy(check = it.check.copy(reportState = next)) }
         }
+    }
+
+    /** Counts "money protected" when someone stopped before paying. Shown at once; saving is best effort. */
+    fun answerPaid(paid: Boolean) {
+        val checkId = _state.value.check.result?.checkId ?: return
+        _state.update { it.copy(check = it.check.copy(paid = paid)) }
+        viewModelScope.launch { runCatching { api.answerPaid(checkId, paid) } }
     }
 
     // ---- Report form ----

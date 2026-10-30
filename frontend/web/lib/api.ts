@@ -18,6 +18,7 @@ export type CheckResult = {
   sender?: { kind: string; value: string; label: Text2; note: Text2 } | null;
 };
 export type IdType = "phone" | "upi" | "url";
+export type Stats = { checks: number; reports: number; moneyProtectedInr: number };
 
 export class ApiError extends Error {
   constructor(
@@ -86,6 +87,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
   deleteMyData: () => call<{ reports: number; checks: number }>("/v1/me", { method: "DELETE" }),
+  answerPaid: (checkId: string, paid: "yes" | "no") =>
+    call<null>(`/v1/checks/${encodeURIComponent(checkId)}/paid`, {
+      method: "POST",
+      body: JSON.stringify({ paid }),
+    }),
+  stats: () => call<Stats>("/v1/stats"),
 };
 
 /** Guesses whether a typed value is a phone, UPI ID or link. */

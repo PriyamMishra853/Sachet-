@@ -285,9 +285,52 @@ describe("DELETE /v1/me", () => {
   });
 });
 
+describe("channel", () => {
+  it("counts the Android app apart from the website, with the same identity", async () => {
+    const { app, store } = makeTestApp();
+    const channels: string[] = [];
+    const record = store.recordCheck.bind(store);
+    store.recordCheck = async (c) => {
+      channels.push(c.channel);
+      return record(c);
+    };
+    const check = (headers: Record<string, string>) =>
+      app.inject({ url: "/v1/check?type=phone&value=9876543210", headers });
+
+    await check({ "x-client-id": cid("phone"), "x-sachet-client": "android" });
+    await check({ "x-client-id": cid("phone") });
+    expect(channels).toEqual(["android", "web"]);
+
+    // "Delete my data" from the app removes both, since the browser ID is the same.
+    const res = await app.inject({
+      method: "DELETE",
+      url: "/v1/me",
+      headers: { "x-client-id": cid("phone"), "x-sachet-client": "android" },
+    });
+    expect(res.json()).toEqual({ reports: 0, checks: 2 });
+  });
+});
+
+describe("GET /v1/stats", () => {
+  it("counts at most once a minute, however many people open the home page", async () => {
+    const { app, store } = makeTestApp();
+    let counted = 0;
+    const real = store.stats.bind(store);
+    store.stats = async () => {
+      counted++;
+      return real();
+    };
+    for (let i = 0; i < 5; i++) {
+      const res = await app.inject({ url: "/v1/stats" });
+      expect(res.json()).toEqual({ checks: 0, reports: 0, moneyProtectedInr: 0 });
+    }
+    expect(counted).toBe(1);
+  });
+});
+
 describe("money protected", () => {
   it("counts amounts when the user answers 'No, I didn't pay'", async () => {
-    const { app } = makeTestApp();
+    const { app, store } = makeTestApp();
     const check = await app.inject({
       method: "POST",
       url: "/v1/check/message",
@@ -303,7 +346,7 @@ describe("money protected", () => {
         headers: { "x-client-id": client },
         payload: { paid: "no" },
       });
-    const stats = async () => (await app.inject({ url: "/v1/stats" })).json().moneyProtectedInr;
+    const stats = async () => (await store.stats()).moneyProtectedInr;
 
     // Someone else who got hold of the check ID can't answer for this person.
     expect((await answer(cid("stranger"))).statusCode).toBe(204);

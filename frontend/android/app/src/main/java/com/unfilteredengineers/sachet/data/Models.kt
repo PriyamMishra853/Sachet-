@@ -68,4 +68,10 @@ data class ReportResponse(val reportId: String? = null, val duplicate: Boolean)
 data class DeleteResponse(val reports: Int, val checks: Int)
 
 @Serializable
+data class PaidRequest(val paid: String)
+
+@Serializable
+data class Stats(val checks: Long = 0, val reports: Long = 0, val moneyProtectedInr: Long = 0)
+
+@Serializable
 data class ErrorBody(val error: String? = null, val reason: String? = null)

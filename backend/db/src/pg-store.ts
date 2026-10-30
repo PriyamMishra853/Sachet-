@@ -174,7 +174,7 @@ export function createPgStore(sql: Sql): Store {
       const { rows } = await sql.query<{ checks: number; reports: number; protected: number }>(
         `SELECT (SELECT count(*)::int FROM checks) AS checks,
                 (SELECT count(*)::int FROM reports) AS reports,
-                (SELECT COALESCE(sum(amount_inr), 0)::int FROM checks
+                (SELECT COALESCE(sum(amount_inr), 0)::bigint FROM checks
                   WHERE user_paid = 'no' AND verdict_band IN ('medium', 'high')) AS protected`,
       );
       const r = rows[0]!;

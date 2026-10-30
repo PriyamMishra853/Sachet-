@@ -74,8 +74,10 @@ export function v1Routes(
   // their reports count once; without it we fall back to the IP address.
   // The client picks that ID, so one person can send many: `network` (a hash
   // of the IP, never the IP itself) makes reports from one network count once.
+  // The Android app says so in a header. Only used to count app and website
+  // use apart; anyone could send it, so it never changes what a user can do.
   const webCtx = (req: FastifyRequest): Ctx => ({
-    channel: "web",
+    channel: req.headers["x-sachet-client"] === "android" ? "android" : "web",
     userHash: hashUser(salt, "web", clientIdOf(req) ?? `ip:${req.ip}`),
     network: hashUser(salt, "net", networkOf(req.ip)),
   });
@@ -170,7 +172,15 @@ export function v1Routes(
     },
   );
 
-  app.get("/v1/stats", async () => store.stats());
+  // Shown on every home page visit, so counted at most once a minute: a flood
+  // of visits can't turn into a flood of database counts.
+  app.get("/v1/stats", async () => {
+    const cached = await cache.get("stats").catch(() => null);
+    if (cached) return JSON.parse(cached) as unknown;
+    const stats = await store.stats();
+    await cache.set("stats", JSON.stringify(stats), 60).catch(() => {});
+    return stats;
+  });
 
   // "Delete my data" for the web: removes everything tied to this browser's ID.
   // It needs that ID: falling back to the IP would let anyone on the same

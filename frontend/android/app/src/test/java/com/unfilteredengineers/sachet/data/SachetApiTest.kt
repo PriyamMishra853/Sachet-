@@ -86,6 +86,22 @@ class SachetApiTest {
     }
 
     @Test
+    fun `answers 'Did you pay' with an empty 204 reply`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(204))
+        api.answerPaid("0b6f1c9e-1d2a-4c3b-9e8f-7a6b5c4d3e2f", paid = false)
+        val req = server.takeRequest()
+        assertEquals("/v1/checks/0b6f1c9e-1d2a-4c3b-9e8f-7a6b5c4d3e2f/paid", req.path)
+        assertEquals("""{"paid":"no"}""", req.body.readUtf8())
+        assertEquals("android", req.getHeader("x-sachet-client"))
+    }
+
+    @Test
+    fun `reads the impact numbers`() = runTest {
+        server.enqueue(json(200, """{"checks":1240,"reports":87,"moneyProtectedInr":450000}"""))
+        assertEquals(Stats(1240, 87, 450000), api.stats())
+    }
+
+    @Test
     fun `encodes the identifier safely in the query`() = runTest {
         server.enqueue(json(200, """{"band":"unknown","label":{"en":"No reports yet","hi":"अभी तक कोई शिकायत नहीं"}}"""))
         api.checkIdentifier(IdType.PHONE, "+91 98765&x=1")

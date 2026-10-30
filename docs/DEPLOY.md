@@ -91,7 +91,13 @@ Limits: the test number can only reply within 24 hours of the user's last messag
 "Did you pay?" follow-up needs that window too. The access token expires on 26 Dec 2026; make a
 new system-user token before then.
 
-## 6. Test on your phone
+## 6. Android app
+
+Debug APKs come from every CI run (Actions → the run → Artifacts → `sachet-debug-apk`). For a
+release build signed with your own key, follow "Release build" in
+[frontend/android/README.md](../frontend/android/README.md).
+
+## 7. Test on your phone
 
 1. Telegram → @SachetkroBot → `/start`, then forward a scam message.
 2. Android Chrome → open `https://<project>.vercel.app` → tap **📲 Install app**

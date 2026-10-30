@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,6 +11,12 @@ val apiUrlDebug = providers.gradleProperty("sachet.apiUrl.debug").get()
 val apiUrlRelease = providers.gradleProperty("sachet.apiUrl.release").get()
 // A release build talks to the real API over the internet: never in plain http.
 require(apiUrlRelease.startsWith("https://")) { "sachet.apiUrl.release must start with https://" }
+
+// The release signing key lives outside git: keystore.properties (git-ignored)
+// says where the .jks file is and its passwords. Without it, release builds
+// come out unsigned, which is fine for testing but not for the Play Store.
+val keystoreFile = rootProject.file("keystore.properties")
+val keystore = Properties().apply { if (keystoreFile.exists()) keystoreFile.inputStream().use(::load) }
 
 android {
     namespace = "com.unfilteredengineers.sachet"
@@ -24,6 +32,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystore.getProperty("storeFile"))
+                storePassword = keystore.getProperty("storePassword")
+                keyAlias = keystore.getProperty("keyAlias")
+                keyPassword = keystore.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -31,6 +50,7 @@ android {
         }
         release {
             buildConfigField("String", "API_URL", "\"$apiUrlRelease\"")
+            signingConfig = signingConfigs.findByName("release")
             // Shrinks and obfuscates the code, and drops unused resources.
             isMinifyEnabled = true
             isShrinkResources = true

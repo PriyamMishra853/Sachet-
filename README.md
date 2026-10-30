@@ -117,10 +117,13 @@ See [frontend/android/README.md](frontend/android/README.md) to build and run it
 | `GET /v1/check?type=phone\|upi\|url&value=` | one identifier                                                       | band, label, reasons, advice (en + hi), reportCount, checkId   |
 | `POST /v1/check/message`                    | `{ text, sender? }`                                                  | the same, plus extracted identifiers, amounts, signals, sender |
 | `POST /v1/reports`                          | `{ identifiers?, text?, scamType?, amountInr? }` + `Idempotency-Key` | `202 { reportId, duplicate }`                                  |
-| `POST /v1/checks/:id/paid`                  | `{ paid: "yes" \| "no" }`                                            | `204` (counts money protected)                                 |
-| `GET /v1/stats`                             | –                                                                    | checks, reports, moneyProtectedInr                             |
+| `POST /v1/checks/:id/paid`                  | `{ paid: "yes" \| "no" }`                                            | `204` (counts money protected; only the checker can answer)    |
+| `GET /v1/stats`                             | –                                                                    | checks, reports, moneyProtectedInr (counted once a minute)     |
 | `DELETE /v1/me`                             | `X-Client-Id` header                                                 | deleted counts                                                 |
 | `GET /health`                               | –                                                                    | database and cache status                                      |
+
+Headers: `X-Client-Id` (the browser's or app's random ID) and `X-Sachet-Client: android` from the
+app, which only labels its checks and reports as the `android` channel.
 
 Limits: 60 checks a minute per network, 20 reports an hour per person and 30 per network.
 On the web, reports about one identifier count once per network, so one person can't fake
@@ -168,21 +171,21 @@ the known gaps, and the launch checklist.
 
 ## Status
 
-| Day | Build                                          | Status                     |
-| --- | ---------------------------------------------- | -------------------------- |
-| 1   | Monorepo, TypeScript, ESLint, Vitest, CI       | Done                       |
-| 2   | Normalizers: phone, UPI ID, URL                | Done                       |
-| 3   | Migrations, seed script                        | Code done, needs Supabase  |
-| 4–5 | Check + report API, cache, idempotency, limits | Code done, needs Upstash   |
-| 6–7 | Extractor, rules for 10 scam types             | Done, needs real messages  |
-| 8   | Safe Browsing + phishing feeds                 | Code done, needs API key   |
-| 9   | Telegram bot                                   | Code done, needs token     |
-| 10  | WhatsApp webhook (test number)                 | Keys valid, needs deploy   |
-| 11  | Language choice, report flow, follow-up        | Done                       |
-| 12  | Web app: check, result card, report form, PWA  | Done, PWA needs HTTPS test |
-| 13  | Hindi text, privacy notice, about page         | Done, Hindi needs review   |
-| 14  | Deploy (Docker, Railway/Render, Vercel)        | Dockerfile ready           |
-| 15  | Demo day: 20 testers                           | Not started                |
+| Day | Build                                          | Status                        |
+| --- | ---------------------------------------------- | ----------------------------- |
+| 1   | Monorepo, TypeScript, ESLint, Vitest, CI       | Done                          |
+| 2   | Normalizers: phone, UPI ID, URL                | Done                          |
+| 3   | Migrations, seed script                        | Code done, needs Supabase     |
+| 4–5 | Check + report API, cache, idempotency, limits | Code done, needs Upstash      |
+| 6–7 | Extractor, rules for 10 scam types             | Done, needs real messages     |
+| 8   | Safe Browsing + phishing feeds                 | Code done, needs API key      |
+| 9   | Telegram bot                                   | Code done, needs token        |
+| 10  | WhatsApp webhook (test number)                 | Keys valid, needs deploy      |
+| 11  | Language choice, report flow, follow-up        | Done                          |
+| 12  | Web app: check, result card, report form, PWA  | Done, PWA needs HTTPS test    |
+| 13  | Hindi text, privacy notice, about page         | Done, Hindi needs review      |
+| 14  | Deploy (Docker, Railway/Render, Vercel)        | Image built and checked in CI |
+| 15  | Demo day: 20 testers                           | Not started                   |
 
 ## V2 list
 

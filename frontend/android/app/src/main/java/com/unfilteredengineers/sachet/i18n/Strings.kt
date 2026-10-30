@@ -61,6 +61,20 @@ object T {
         "Can't reach Sachet right now. Check your internet and try again.",
         "अभी Sachet से जुड़ नहीं पा रहे। इंटरनेट जांचें और दोबारा कोशिश करें।",
     )
+    val paidQuestion = Text2("Have you already paid any money?", "क्या आपने पहले ही कोई पैसे भेज दिए हैं?")
+    val paidYes = Text2("Yes, I paid", "हां, भेजे")
+    val paidNo = Text2("No", "नहीं")
+    val afterYes = Text2(
+        "Act now: call 1930 or report at cybercrime.gov.in, and call your bank to block the payment. The sooner you report, the better the chance to freeze the money.",
+        "अभी कदम उठाएं: 1930 पर कॉल करें या cybercrime.gov.in पर शिकायत करें, और पेमेंट रोकने के लिए अपने बैंक को कॉल करें। जितनी जल्दी शिकायत करेंगे, पैसे रोकने की संभावना उतनी ज्यादा होगी।",
+    )
+    val afterNo = Text2(
+        "Well done! You stopped a scam. Share Sachet with your family so they can check too.",
+        "बहुत बढ़िया! आपने एक धोखाधड़ी रोक दी। Sachet को अपने परिवार के साथ शेयर करें ताकि वे भी जांच सकें।",
+    )
+    val statsChecks = Text2("checks", "जांचें")
+    val statsReports = Text2("scam reports", "धोखाधड़ी की शिकायतें")
+    val statsProtected = Text2("kept from scammers", "धोखेबाज़ों से बचाए गए")
     val reportTitle = Text2("Report a scam", "धोखाधड़ी की शिकायत करें")
     val reportIntro = Text2(
         "Your report warns the next person. Add the scammer's number, UPI ID or link, and the message if you have it.",

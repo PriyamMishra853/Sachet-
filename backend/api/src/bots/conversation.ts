@@ -10,7 +10,7 @@ import type { Checker } from "../services/checker.js";
 export type Button = { id: string; title: string };
 export type BotReply = { text: string; buttons?: Button[] };
 export type Incoming = {
-  channel: Exclude<Channel, "web">;
+  channel: Extract<Channel, "telegram" | "whatsapp">;
   /** Telegram chat ID or WhatsApp phone number. Hashed before storage. */
   userId: string;
   /** Unique per incoming message, so a retried delivery is reported once. */

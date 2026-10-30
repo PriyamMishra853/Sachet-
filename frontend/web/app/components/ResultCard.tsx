@@ -15,11 +15,20 @@ export function ResultCard({ result, checked }: { result: CheckResult; checked: 
   const [reportState, setReportState] = useState<
     "idle" | "sending" | "done" | "duplicate" | "error"
   >("idle");
+  const [paid, setPaid] = useState<"yes" | "no" | null>(null);
   // One key per result: double taps and retries create one report.
   const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const e = result.extracted;
   const found = e ? [...e.phones, ...e.upis, ...e.domains] : [];
+
+  // Counts "money protected" when someone stopped before paying. The answer
+  // shows straight away; saving it is best effort.
+  function answerPaid(answer: "yes" | "no") {
+    setPaid(answer);
+    if (result.checkId) void api.answerPaid(result.checkId, answer).catch(() => {});
+  }
+  const askPaid = result.checkId && (result.band === "high" || result.band === "medium");
 
   async function report() {
     setReportState("sending");
@@ -86,6 +95,35 @@ export function ResultCard({ result, checked }: { result: CheckResult; checked: 
           <li key={a.en}>{a[lang]}</li>
         ))}
       </ul>
+
+      {askPaid && (
+        <div className="paid">
+          {paid === null ? (
+            <>
+              <p>
+                <strong>{tr("paidQuestion")}</strong>
+              </p>
+              <div className="paid-buttons">
+                <button className="secondary" onClick={() => answerPaid("yes")}>
+                  {tr("paidYes")}
+                </button>
+                <button className="secondary" onClick={() => answerPaid("no")}>
+                  {tr("paidNo")}
+                </button>
+              </div>
+            </>
+          ) : paid === "yes" ? (
+            <>
+              <p className="error">{tr("afterYes")}</p>
+              <a className="primary button-link" href="tel:1930">
+                {tr("call1930")}
+              </a>
+            </>
+          ) : (
+            <p className="ok">{tr("afterNo")}</p>
+          )}
+        </div>
+      )}
 
       <div className="actions">
         {reportState === "done" || reportState === "duplicate" ? (

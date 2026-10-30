@@ -30,6 +30,24 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: 1
 
+  # The API image exactly as Railway builds it, started the same way, and
+  # checked to answer /health. Catches a broken Dockerfile before a deploy does.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f backend/api/Dockerfile -t sachet-api .
+      - name: Start the image and check /health
+        run: |
+          docker run -d --name api -p 3000:3000 \
+            -e NODE_ENV=production -e HASH_SALT=ci-only-salt-not-secret-0123456789 sachet-api
+          for i in $(seq 1 30); do
+            if curl -fsS localhost:3000/health; then exit 0; fi
+            sleep 1
+          done
+          docker logs api
+          exit 1
+
   # The Android app: unit tests, Android lint, and a debug APK you can
   # download from the run's Artifacts. GitHub's Ubuntu runners have the
   # Android SDK installed.

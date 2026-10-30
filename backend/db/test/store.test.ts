@@ -200,8 +200,20 @@ describe("migrate", () => {
   it("applies each migration once", async () => {
     const db = new PGlite();
     const sql: Sql = { query: (t, p) => db.query(t, p) as never, exec: (t) => db.exec(t) };
-    expect(await migrate(sql)).toEqual(["001_init.sql"]);
+    expect(await migrate(sql)).toEqual(["001_init.sql", "002_android_channel.sql"]);
     expect(await migrate(sql)).toEqual([]);
+  });
+
+  it("accepts the android channel and still rejects unknown ones", async () => {
+    const db = new PGlite();
+    const sql: Sql = { query: (t, p) => db.query(t, p) as never, exec: (t) => db.exec(t) };
+    await migrate(sql);
+    const insert = (channel: string) =>
+      sql.query("INSERT INTO checks (channel, user_hash, verdict_band) VALUES ($1, 'u', 'high')", [
+        channel,
+      ]);
+    await expect(insert("android")).resolves.toBeDefined();
+    await expect(insert("ios")).rejects.toThrow(/check constraint/);
   });
 
   it("rejects a bad enum value through the CHECK constraint", async () => {

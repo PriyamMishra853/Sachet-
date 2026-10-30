@@ -51,6 +51,23 @@ Set in `gradle.properties`:
 On a real phone with a debug build: plug it in over USB with USB debugging on, run
 `adb reverse tcp:3000 tcp:3000`, and set `sachet.apiUrl.debug=http://localhost:3000`.
 
+## Release build
+
+1. Set your Railway URL in `gradle.properties`: `sachet.apiUrl.release=https://….up.railway.app`.
+2. Make a signing key once, and keep it outside the repo (it asks for passwords; remember them):
+
+   ```bash
+   keytool -genkeypair -v -keystore ~/keys/sachet-release.jks -alias sachet -keyalg RSA -keysize 4096 -validity 10000
+   ```
+
+3. Copy `keystore.properties.example` to `keystore.properties` and fill in the path and
+   passwords. It is git-ignored.
+4. `./gradlew bundleRelease` makes `app/build/outputs/bundle/release/app-release.aab` for the
+   Play Store; `./gradlew assembleRelease` makes an APK to share directly.
+
+Back up the `.jks` file and its passwords (a password manager is good). If they are lost, the
+Play Store app can never be updated again.
+
 ## Security
 
 - **One permission: Internet.** No contacts, SMS, call log or location.

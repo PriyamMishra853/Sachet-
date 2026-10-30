@@ -8,7 +8,7 @@ export type IdentifierKind = (typeof IDENTIFIER_KINDS)[number];
 export const RISK_BANDS = ["unknown", "low", "medium", "high"] as const;
 export type RiskBand = (typeof RISK_BANDS)[number];
 
-export const CHANNELS = ["telegram", "whatsapp", "web"] as const;
+export const CHANNELS = ["telegram", "whatsapp", "web", "android"] as const;
 export type Channel = (typeof CHANNELS)[number];
 
 export type Lang = "en" | "hi";

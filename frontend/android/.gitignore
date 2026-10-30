@@ -6,6 +6,7 @@ local.properties
 *.iml
 .kotlin/
 captures/
-# Signing keys must never be committed.
+# Signing keys and their passwords must never be committed.
 *.jks
 *.keystore
+keystore.properties
