@@ -75,7 +75,26 @@ data class UiState(
     val stats: Stats? = null,
 )
 
-class SachetViewModel(app: Application) : AndroidViewModel(app) {
+/**
+ * Everything the screens can ask for. The view model does the work; the
+ * screenshot tests pass a stand-in, so screens can be drawn without a phone.
+ */
+interface SachetActions {
+    fun show(screen: Screen)
+    fun toggleLang()
+    fun setTab(tab: Tab)
+    fun setInput(value: String)
+    fun setSender(value: String)
+    fun runCheck()
+    fun checkScreenshot(uri: Uri)
+    fun reportChecked()
+    fun answerPaid(paid: Boolean)
+    fun editReport(change: (ReportUi) -> ReportUi)
+    fun sendReport()
+    fun deleteMyData()
+}
+
+class SachetViewModel(app: Application) : AndroidViewModel(app), SachetActions {
     private val prefs = Prefs(app)
     private val api = SachetApi(BuildConfig.API_URL, clientId = { prefs.clientId })
     private val screenshots = ScreenshotReader(app)
@@ -87,7 +106,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
         loadStats()
     }
 
-    fun show(screen: Screen) = _state.update { it.copy(screen = screen) }
+    override fun show(screen: Screen) = _state.update { it.copy(screen = screen) }
 
     /** Impact numbers for the home screen. Left out quietly when offline. */
     fun loadStats() {
@@ -96,7 +115,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun toggleLang() {
+    override fun toggleLang() {
         val next = if (_state.value.lang == Lang.EN) Lang.HI else Lang.EN
         prefs.lang = next
         _state.update { it.copy(lang = next) }
@@ -104,12 +123,12 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- Check ----
 
-    fun setTab(tab: Tab) = _state.update { it.copy(check = it.check.copy(tab = tab, error = null)) }
+    override fun setTab(tab: Tab) = _state.update { it.copy(check = it.check.copy(tab = tab, error = null)) }
 
-    fun setInput(value: String) =
+    override fun setInput(value: String) =
         _state.update { it.copy(check = it.check.copy(input = value.take(MAX_MESSAGE_LENGTH))) }
 
-    fun setSender(value: String) =
+    override fun setSender(value: String) =
         _state.update { it.copy(check = it.check.copy(sender = value.take(40))) }
 
     /** A message shared from another app: show it and check it straight away. */
@@ -120,7 +139,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** A screenshot of a message, shared or picked: read its text on the phone, then check it. */
-    fun checkScreenshot(uri: Uri) {
+    override fun checkScreenshot(uri: Uri) {
         if (_state.value.check.loading) return
         _state.update {
             it.copy(screen = Screen.CHECK, check = CheckUi(tab = Tab.MESSAGE, loading = true, reading = true))
@@ -143,7 +162,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
         screenshots.close()
     }
 
-    fun runCheck() {
+    override fun runCheck() {
         val c = _state.value.check
         val value = c.input.trim()
         if (value.isEmpty() || c.loading) return
@@ -177,7 +196,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun reportChecked() {
+    override fun reportChecked() {
         val c = _state.value.check
         val checked = c.checked ?: return
         if (c.reportState == SendState.SENDING) return
@@ -197,7 +216,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Counts "money protected" when someone stopped before paying. Shown at once; saving is best effort. */
-    fun answerPaid(paid: Boolean) {
+    override fun answerPaid(paid: Boolean) {
         val checkId = _state.value.check.result?.checkId ?: return
         _state.update { it.copy(check = it.check.copy(paid = paid)) }
         viewModelScope.launch { runCatching { api.answerPaid(checkId, paid) } }
@@ -205,10 +224,10 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- Report form ----
 
-    fun editReport(change: (ReportUi) -> ReportUi) =
+    override fun editReport(change: (ReportUi) -> ReportUi) =
         _state.update { it.copy(report = change(it.report).copy(error = null)) }
 
-    fun sendReport() {
+    override fun sendReport() {
         val r = _state.value.report
         val id = r.identifier.trim()
         val text = r.text.trim()
@@ -234,7 +253,7 @@ class SachetViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- Privacy ----
 
-    fun deleteMyData() {
+    override fun deleteMyData() {
         if (_state.value.deleting) return
         _state.update { it.copy(deleting = true, deleteMessage = null) }
         viewModelScope.launch {

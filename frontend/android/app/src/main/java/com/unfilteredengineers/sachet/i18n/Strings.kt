@@ -16,7 +16,70 @@ data class Text2(val en: String, val hi: String) {
 object T {
     val tagline = Text2("Stop the scam before the payment", "पेमेंट से पहले धोखाधड़ी रोकें")
     val navCheck = Text2("Check", "जांचें")
-    val navReport = Text2("Report", "शिकायत")
+    val navReport = Text2("Report a scam", "शिकायत करें")
+    val brandTagline = Text2("Free scam check", "मुफ़्त धोखाधड़ी जांच")
+    val heroEyebrow = Text2("Free · No sign-up · Hindi and English", "मुफ़्त · बिना साइन-अप · हिंदी और अंग्रेज़ी")
+    val heroTitle = Text2(
+        "Got a suspicious message? Check it before you pay.",
+        "शक वाला मैसेज आया है? पैसे भेजने से पहले जांच लें।",
+    )
+    val heroLead = Text2(
+        "Paste the message, or the phone number, UPI ID or link in it. In a few seconds Sachet tells you if it looks like a fraud, and what to do next.",
+        "मैसेज पेस्ट करें, या उसमें दिया फोन नंबर, UPI ID या लिंक डालें। कुछ ही सेकंड में Sachet बताएगा कि यह धोखाधड़ी लगती है या नहीं, और आगे क्या करें।",
+    )
+    val trustNever = Text2(
+        "Sachet never calls you or asks for your OTP, PIN or bank details.",
+        "Sachet न कभी कॉल करता है, न आपका OTP, PIN या बैंक विवरण मांगता है।",
+    )
+    val trustNotKept = Text2(
+        "The message you check is not saved. Only reports are kept, with personal details removed.",
+        "आपका जांचा गया मैसेज सेव नहीं होता। सिर्फ शिकायतें रखी जाती हैं, निजी जानकारी हटाकर।",
+    )
+    val trustPeople = Text2(
+        "Warnings come from reports by people like you and from public lists of fraud websites.",
+        "चेतावनियां आप जैसे लोगों की शिकायतों और धोखाधड़ी वाली वेबसाइटों की सार्वजनिक सूचियों से आती हैं।",
+    )
+    val formQuestion = Text2("What do you want to check?", "आप क्या जांचना चाहते हैं?")
+    val fieldMessage = Text2("Paste the full message", "पूरा मैसेज पेस्ट करें")
+    val fieldPhone = Text2("Phone number", "फोन नंबर")
+    val fieldUpi = Text2("UPI ID", "UPI ID")
+    val fieldUrl = Text2("Link or website", "लिंक या वेबसाइट")
+    val senderToggle = Text2("Add who sent it (optional)", "भेजने वाला जोड़ें (वैकल्पिक)")
+    val senderHelp = Text2(
+        "The name or number at the top of the SMS. It helps spot fake bank and government messages.",
+        "SMS में सबसे ऊपर दिखने वाला नाम या नंबर। इससे नकली बैंक और सरकारी मैसेज पहचानने में मदद मिलती है।",
+    )
+    val scamsTitle = Text2("Common scams in India", "भारत में आम धोखाधड़ी")
+    val scamsLead = Text2(
+        "Most frauds follow a few scripts. If a message sounds like one of these, stop and check it first.",
+        "ज़्यादातर धोखाधड़ी कुछ तय तरीकों से होती है। अगर कोई मैसेज इनमें से किसी जैसा लगे, तो रुकें और पहले जांचें।",
+    )
+    val helpTitle = Text2("Already paid a scammer?", "धोखेबाज़ को पैसे भेज चुके हैं?")
+    val helpBody = Text2(
+        "Call 1930, the national cyber fraud helpline, right away. The sooner you call, the better the chance to stop the money. You can also report at cybercrime.gov.in.",
+        "तुरंत 1930 पर कॉल करें, यह राष्ट्रीय साइबर धोखाधड़ी हेल्पलाइन है। जितनी जल्दी कॉल करेंगे, पैसे रोकने की संभावना उतनी ज़्यादा होगी। आप cybercrime.gov.in पर भी शिकायत कर सकते हैं।",
+    )
+    val reportOnline = Text2("Report at cybercrime.gov.in", "cybercrime.gov.in पर शिकायत करें")
+    val bandSubHigh = Text2(
+        "This looks like a scam. Do not pay or share any code.",
+        "यह धोखाधड़ी लगती है। पैसे न भेजें और कोई कोड न बताएं।",
+    )
+    val bandSubMedium = Text2(
+        "This may be a scam. Check carefully before you do anything.",
+        "यह धोखाधड़ी हो सकती है। कुछ भी करने से पहले ध्यान से जांचें।",
+    )
+    val bandSubLow = Text2("Little risk found.", "कम जोखिम मिला।")
+    val bandSubUnknown = Text2(
+        "Nobody has reported this yet. That does not mean it is safe.",
+        "अभी तक किसी ने इसकी शिकायत नहीं की है। इसका मतलब यह नहीं कि यह सुरक्षित है।",
+    )
+    val scamTypeLabel = Text2("Type of scam", "धोखाधड़ी का प्रकार")
+    val statsTitle = Text2("So far", "अब तक")
+    val privacyTitle = Text2("Your privacy", "आपकी गोपनीयता")
+    val privacyLead = Text2(
+        "What Sachet keeps, what it never keeps, and how to delete your data.",
+        "Sachet क्या रखता है, क्या कभी नहीं रखता, और अपना डेटा कैसे मिटाएं।",
+    )
     val navPrivacy = Text2("Privacy", "गोपनीयता")
     val checkTitle = Text2("Is this a scam?", "क्या यह धोखाधड़ी है?")
     val checkIntro = Text2(
@@ -24,10 +87,10 @@ object T {
         "मैसेज पेस्ट करें, या फोन नंबर, UPI ID या लिंक डालें। लगभग एक सेकंड में जवाब मिलेगा।",
     )
     val shareTip = Text2(
-        "Tip: in WhatsApp or SMS, long-press a message → Share → Sachet to check it straight away. You can share a screenshot too.",
-        "सुझाव: WhatsApp या SMS में मैसेज को दबाकर रखें → शेयर → Sachet, और तुरंत जांच हो जाएगी। आप स्क्रीनशॉट भी शेयर कर सकते हैं।",
+        "Tip: in WhatsApp or SMS, long-press a message, tap Share, and pick Sachet to check it straight away. You can share a screenshot too.",
+        "सुझाव: WhatsApp या SMS में मैसेज को दबाकर रखें, शेयर दबाएं, और Sachet चुनें; तुरंत जांच हो जाएगी। आप स्क्रीनशॉट भी शेयर कर सकते हैं।",
     )
-    val screenshotButton = Text2("📷 Check a screenshot", "📷 स्क्रीनशॉट जांचें")
+    val screenshotButton = Text2("Check a screenshot instead", "इसकी जगह स्क्रीनशॉट जांचें")
     val readingScreenshot = Text2("Reading the screenshot…", "स्क्रीनशॉट पढ़ रहे हैं…")
     val screenshotNote = Text2(
         "The picture is read on your phone and never uploaded. Only the text in it is checked.",
@@ -42,23 +105,26 @@ object T {
         "यह तस्वीर पढ़ नहीं पाए। अगर अभी Sachet इंस्टॉल किया है, तो एक मिनट रुककर फिर कोशिश करें।",
     )
     val tabMessage = Text2("Message", "मैसेज")
-    val tabPhone = Text2("Phone", "फोन")
+    val tabPhone = Text2("Phone number", "फोन नंबर")
     val tabUpi = Text2("UPI ID", "UPI ID")
     val tabUrl = Text2("Link", "लिंक")
-    val phMessage = Text2("Paste the full message here…", "पूरा मैसेज यहां पेस्ट करें…")
+    val phMessage = Text2(
+        "For example: Your electricity will be cut tonight. Call 98765 43210 to update your bill.",
+        "जैसे: आज रात आपकी बिजली काट दी जाएगी। बिल अपडेट करने के लिए 98765 43210 पर कॉल करें।",
+    )
     val phPhone = Text2("e.g. +91 98765 43210", "जैसे +91 98765 43210")
     val phUpi = Text2("e.g. name@ybl", "जैसे name@ybl")
-    val phUrl = Text2("e.g. bit.ly/abc", "जैसे bit.ly/abc")
-    val senderLabel = Text2("Sender (optional)", "भेजने वाला (वैकल्पिक)")
-    val senderPlaceholder = Text2("SMS name like VM-HDFCBK-S, or the number", "SMS का नाम जैसे VM-HDFCBK-S, या नंबर")
+    val phUrl = Text2("e.g. bit.ly/abc or sbi-kyc.xyz", "जैसे bit.ly/abc या sbi-kyc.xyz")
+    val senderLabel = Text2("Who sent it?", "किसने भेजा?")
+    val senderPlaceholder = Text2("e.g. VM-HDFCBK-S or 98765 43210", "जैसे VM-HDFCBK-S या 98765 43210")
     val sender = Text2("Sender", "भेजने वाला")
     val checkButton = Text2("Check now", "अभी जांचें")
     val checking = Text2("Checking…", "जांच हो रही है…")
-    val why = Text2("Why", "क्यों")
-    val whatToDo = Text2("What to do", "क्या करें")
+    val why = Text2("Why we say this", "हम ऐसा क्यों कह रहे हैं")
+    val whatToDo = Text2("What to do now", "अब क्या करें")
     val found = Text2("Found in the message", "मैसेज में मिला")
-    val reportedBy = Text2("Reports", "शिकायतें")
-    val reportThis = Text2("🚩 Report this as a scam", "🚩 इसकी शिकायत करें")
+    val reportedBy = Text2("People who reported it", "शिकायत करने वाले लोग")
+    val reportThis = Text2("Report this as a scam", "इसकी शिकायत करें")
     val reportThanks = Text2(
         "Thank you. Your report will warn the next person who checks this.",
         "धन्यवाद। आपकी शिकायत अगली बार जांच करने वाले को सावधान करेगी।",
@@ -103,12 +169,7 @@ object T {
         "Don't include your own name, OTP or bank details. We remove personal details we can find before saving.",
         "अपना नाम, OTP या बैंक विवरण न डालें। सेव करने से पहले हम मिलने वाली निजी जानकारी हटा देते हैं।",
     )
-    val lostMoney = Text2(
-        "Lost money? Call 1930 now or report at cybercrime.gov.in",
-        "पैसे गए? अभी 1930 पर कॉल करें या cybercrime.gov.in पर शिकायत करें",
-    )
-    val call1930 = Text2("📞 Call 1930", "📞 1930 पर कॉल करें")
-    val openCybercrime = Text2("cybercrime.gov.in", "cybercrime.gov.in")
+    val call1930 = Text2("Call 1930", "1930 पर कॉल करें")
     val unknown = Text2("Not sure", "पता नहीं")
     val deleteButton = Text2("Delete my data", "मेरा डेटा मिटाएं")
     val deleteConfirmTitle = Text2("Delete your data?", "अपना डेटा मिटाएं?")
@@ -128,8 +189,8 @@ object T {
     )
     val aboutTitle = Text2("About Sachet", "Sachet के बारे में")
     val aboutBody = Text2(
-        "Sachet checks phone numbers, UPI IDs, links and messages for scams, using reports from people like you, phishing lists and Google Safe Browsing. When it knows nothing about something, it says \"No reports yet\", never \"safe\".",
-        "Sachet आप जैसे लोगों की शिकायतों, फ़िशिंग सूचियों और Google Safe Browsing की मदद से फोन नंबर, UPI ID, लिंक और मैसेज में धोखाधड़ी की जांच करता है। जब उसे किसी चीज़ के बारे में कुछ पता नहीं होता, तो वह \"अभी तक कोई शिकायत नहीं\" कहता है, कभी \"सुरक्षित\" नहीं।",
+        "Sachet checks phone numbers, UPI IDs, links and messages for scams, using reports from people like you and public lists of fraud websites. When it knows nothing about something, it says \"No reports yet\", never \"safe\". It is a free student project by Team UnfilteredEngineers (UIET, CSJM University Kanpur), not a government service.",
+        "Sachet आप जैसे लोगों की शिकायतों और धोखाधड़ी वाली वेबसाइटों की सार्वजनिक सूचियों की मदद से फोन नंबर, UPI ID, लिंक और मैसेज में धोखाधड़ी की जांच करता है। जब उसे किसी चीज़ के बारे में कुछ पता नहीं होता, तो वह \"अभी तक कोई रिपोर्ट नहीं\" कहता है, कभी \"सुरक्षित\" नहीं। यह Team UnfilteredEngineers (UIET, CSJM विश्वविद्यालय कानपुर) का मुफ़्त छात्र प्रोजेक्ट है, सरकारी सेवा नहीं।",
     )
 }
 
@@ -144,6 +205,50 @@ val SCAM_TYPE_NAMES: Map<String, Text2> = linkedMapOf(
     "lottery" to Text2("Lottery / prize / KBC", "लॉटरी / इनाम / KBC"),
     "loan_app" to Text2("Instant loan app", "इंस्टेंट लोन ऐप"),
     "fake_support" to Text2("Fake customer care / OTP", "फर्जी कस्टमर केयर / OTP"),
+)
+
+// One line each, in everyday words: what the scammer says. Same as the website.
+val SCAM_TYPE_HINTS: Map<String, Text2> = mapOf(
+    "investment" to Text2(
+        "A 'tips group' promises big profits from shares or crypto, then asks you to invest more and more.",
+        "एक 'टिप्स ग्रुप' शेयर या क्रिप्टो से बड़े मुनाफ़े का वादा करता है, फिर बार-बार और पैसा लगवाता है।",
+    ),
+    "digital_arrest" to Text2(
+        "Someone posing as police, CBI or customs says you are under 'digital arrest' and must pay to clear your name.",
+        "कोई पुलिस, CBI या कस्टम अफसर बनकर कहता है कि आप 'डिजिटल अरेस्ट' में हैं और नाम साफ़ करने के लिए पैसे दें।",
+    ),
+    "parcel" to Text2(
+        "Your parcel is 'held at customs' or has 'illegal items', and you must pay to release it.",
+        "आपका पार्सल 'कस्टम में रुका' है या उसमें 'गैरकानूनी सामान' है, और छुड़ाने के लिए पैसे देने होंगे।",
+    ),
+    "kyc" to Text2(
+        "Your bank account or SIM will be 'blocked today' unless you update KYC through a link.",
+        "आपका बैंक खाता या SIM 'आज बंद' हो जाएगा, जब तक आप किसी लिंक से KYC अपडेट नहीं करते।",
+    ),
+    "electricity" to Text2(
+        "Your power will be 'cut tonight' unless you call a number or pay a pending bill.",
+        "आपकी बिजली 'आज रात कट' जाएगी, जब तक आप किसी नंबर पर कॉल या बकाया बिल नहीं भरते।",
+    ),
+    "task_job" to Text2(
+        "Earn money for liking videos or writing reviews, then pay a 'fee' to unlock what you earned.",
+        "वीडियो लाइक करने या रिव्यू लिखने के पैसे मिलेंगे, फिर कमाई निकालने के लिए 'फीस' भरनी होगी।",
+    ),
+    "upi_refund" to Text2(
+        "A 'refund' that needs you to scan a QR code or enter your UPI PIN. Entering your PIN always sends money.",
+        "एक 'रिफंड' जिसके लिए QR कोड स्कैन करना या UPI PIN डालना हो। PIN डालने से पैसे हमेशा जाते हैं, आते नहीं।",
+    ),
+    "lottery" to Text2(
+        "You have won a lottery, KBC prize or a car, but must first pay a tax or fee.",
+        "आपने लॉटरी, KBC इनाम या कार जीती है, पर पहले टैक्स या फीस भरनी होगी।",
+    ),
+    "loan_app" to Text2(
+        "An instant loan app takes access to your contacts and photos, then threatens and harasses you.",
+        "इंस्टेंट लोन ऐप आपके कॉन्टैक्ट और फोटो की अनुमति लेता है, फिर धमकाता और परेशान करता है।",
+    ),
+    "fake_support" to Text2(
+        "A fake 'customer care' number asks for your OTP or to install a screen-sharing app.",
+        "नकली 'कस्टमर केयर' नंबर आपका OTP मांगता है या स्क्रीन-शेयरिंग ऐप इंस्टॉल करवाता है।",
+    ),
 )
 
 /** Plain-language privacy notice (DPDP Act). Keep in sync with what the API stores. */
@@ -172,8 +277,8 @@ val PRIVACY_SECTIONS: List<Pair<Text2, List<Text2>>> = listOf(
             "आपके जांचे गए स्क्रीनशॉट: तस्वीर आपके फोन पर ही Google के ML Kit से पढ़ी जाती है और कभी अपलोड नहीं होती। उसमें मिला टेक्स्ट ही पेस्ट किए मैसेज की तरह जांचा जाता है। ML Kit Google को इस्तेमाल के आंकड़े भेजता है, तस्वीर या उसका टेक्स्ट नहीं।",
         ),
         Text2(
-            "Your phone number, contacts, SMS or call log: the app has no permission to read them. It keeps only a random ID on this phone so your reports are counted once, and the server stores just a scrambled code (a salted hash) of it.",
-            "आपका फोन नंबर, कॉन्टैक्ट, SMS या कॉल लॉग: ऐप को इन्हें पढ़ने की अनुमति ही नहीं है। यह इस फोन पर सिर्फ एक रैंडम ID रखता है ताकि आपकी शिकायत एक ही बार गिनी जाए, और सर्वर उसका सिर्फ एक बदला हुआ कोड (salted hash) रखता है।",
+            "Your phone number, contacts, SMS or call log: the app has no permission to read them. It keeps only a random ID on this phone so your reports are counted once, and the server stores just a scrambled code made from it, which can't be turned back into the ID.",
+            "आपका फोन नंबर, कॉन्टैक्ट, SMS या कॉल लॉग: ऐप को इन्हें पढ़ने की अनुमति ही नहीं है। यह इस फोन पर सिर्फ एक रैंडम ID रखता है ताकि आपकी शिकायत एक ही बार गिनी जाए, और सर्वर उससे बना सिर्फ एक बदला हुआ कोड रखता है, जिससे ID वापस नहीं निकाली जा सकती।",
         ),
     ),
     Text2("How we use it", "हम इसका उपयोग कैसे करते हैं") to listOf(
@@ -186,8 +291,8 @@ val PRIVACY_SECTIONS: List<Pair<Text2, List<Text2>>> = listOf(
             "आपके जांचे गए लिंक Google Safe Browsing को भेजे जा सकते हैं, यह देखने के लिए कि Google उन्हें खतरनाक मानता है या नहीं।",
         ),
         Text2(
-            "Website names you check may be looked up in the public domain registration records (RDAP) to see how new the website is.",
-            "आपके जांचे गए वेबसाइट नाम सार्वजनिक डोमेन रजिस्ट्रेशन रिकॉर्ड (RDAP) में देखे जा सकते हैं, यह जानने के लिए कि वेबसाइट कितनी नई है।",
+            "Website names you check may be looked up in public records of when websites were registered, to see how new the website is.",
+            "आपके जांचे गए वेबसाइट नाम उन सार्वजनिक रिकॉर्ड में देखे जा सकते हैं जिनमें वेबसाइट के रजिस्टर होने की तारीख होती है, यह जानने के लिए कि वेबसाइट कितनी नई है।",
         ),
         Text2(
             "If the AI check is switched on: message text you check, after removing the personal details we can find, may be sent to Anthropic's Claude AI for a second opinion. Sachet keeps only its yes/no answer, for up to 7 days.",

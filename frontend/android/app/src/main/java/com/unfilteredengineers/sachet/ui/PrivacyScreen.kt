@@ -1,12 +1,12 @@
 package com.unfilteredengineers.sachet.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,48 +21,45 @@ import androidx.compose.ui.unit.dp
 import com.unfilteredengineers.sachet.BuildConfig
 import com.unfilteredengineers.sachet.i18n.PRIVACY_SECTIONS
 import com.unfilteredengineers.sachet.i18n.T
+import com.unfilteredengineers.sachet.ui.theme.ButtonShape
+import com.unfilteredengineers.sachet.ui.theme.Danger
+import com.unfilteredengineers.sachet.ui.theme.DangerBorder
 
 @Composable
-fun PrivacyScreen(state: UiState, vm: SachetViewModel, padding: PaddingValues) {
+fun PrivacyScreen(state: UiState, vm: SachetActions, padding: PaddingValues) {
     val lang = state.lang
     var confirm by rememberSaveable { mutableStateOf(false) }
 
     Page(padding) {
-        Text(T.navPrivacy.of(lang), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        PageTitle(T.privacyTitle.of(lang), T.privacyLead.of(lang))
 
         for ((title, items) in PRIVACY_SECTIONS) {
-            Text(
-                title.of(lang),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-            )
-            for (item in items) {
-                Row(Modifier.padding(vertical = 2.dp)) {
-                    Text("•  ")
-                    Text(item.of(lang))
-                }
+            Panel(Modifier.padding(bottom = 12.dp)) {
+                Text(
+                    title.of(lang),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                Bullets(items.map { it.of(lang) })
             }
         }
 
         // Deleting can't be undone, so it asks first.
-        Button(
+        OutlinedButton(
             onClick = { confirm = true },
             enabled = !state.deleting,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+            shape = ButtonShape,
+            border = BorderStroke(1.dp, DangerBorder),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Danger),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         ) {
-            Text(T.deleteButton.of(lang))
+            Text(T.deleteButton.of(lang), fontWeight = FontWeight.SemiBold)
         }
         state.deleteMessage?.let { Text(it.of(lang), modifier = Modifier.padding(top = 8.dp)) }
 
-        Text(
-            T.aboutTitle.of(lang),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 24.dp, bottom = 4.dp),
-        )
-        Text(T.aboutBody.of(lang))
+        SectionTitle(T.aboutTitle.of(lang))
+        Text(T.aboutBody.of(lang), style = MaterialTheme.typography.bodyLarge)
         Text(
             "v${BuildConfig.VERSION_NAME}",
             style = MaterialTheme.typography.bodySmall,

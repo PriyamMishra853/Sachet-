@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Window theme while the app starts; Compose draws everything after that. -->
+<!-- Window theme while the app starts; Compose draws everything after that. Light only, like the website. -->
 <resources>
     <style name="Theme.Sachet" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/background</item>

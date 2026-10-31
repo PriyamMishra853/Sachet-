@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.paparazzi)
 }
 
 val apiUrlDebug = providers.gradleProperty("sachet.apiUrl.debug").get()
